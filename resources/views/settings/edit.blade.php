@@ -47,6 +47,7 @@
                 <div class="col-md-6"><x-input name="site_phone" label="Phone" placeholder="e.g. 01712345678" :value="setting('site_phone')" pattern="[0-9+\-\s\(\)]{6,20}" feedback="Enter a valid phone number (6-20 digits)." /></div>
                 <div class="col-12"><x-input name="site_address" label="Address" placeholder="Street, area, city" :value="setting('site_address')" maxlength="255" /></div>
                 <div class="col-12"><x-input name="site_website" type="url" label="Website" placeholder="https://www.example.com" :value="setting('site_website')" maxlength="255" /></div>
+                <div class="col-md-6"><x-select name="receipt_width" label="POS receipt paper" :options="['80' => '80 mm roll (standard)', '58' => '58 mm roll (small)']" :placeholder="false" :value="setting('receipt_width', '80')" help="Width of the thermal printer paper used for POS receipts." /></div>
                 <div class="col-12"><x-textarea name="invoice_footer" label="Invoice footer" placeholder="Text shown at the bottom of every invoice" :value="setting('invoice_footer')" rows="2" maxlength="500" /></div>
             </div></div></div></div>
             <div class="col-lg-4"><div class="card"><div class="card-body">

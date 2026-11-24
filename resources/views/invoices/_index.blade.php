@@ -28,6 +28,9 @@
                     <td class="table-actions">
                         <a class="btn btn-sm btn-light" title="View" href="{{ route($prefix . '.show', $row) }}"><i class="bi bi-eye"></i></a>
                         <a class="btn btn-sm btn-light" title="PDF invoice" target="_blank" rel="noopener" href="{{ route($prefix . '.pdf', $row) }}"><i class="bi bi-file-earmark-pdf"></i></a>
+                        @if ($prefix === 'sales')
+                            <a class="btn btn-sm btn-light" title="POS receipt" target="_blank" rel="noopener" href="{{ route('sales.receipt', $row) }}"><i class="bi bi-receipt-cutoff"></i></a>
+                        @endif
                     </td>
                 </tr>
             @empty

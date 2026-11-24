@@ -124,6 +124,7 @@ class DatabaseSeeder extends Seeder
             'site_favicon' => null,
             'currency_symbol' => "\u{09F3}",
             'invoice_footer' => 'Thank you for your business.',
+            'receipt_width' => '80',
             'barcode_enabled' => '1',
             'barcode_min_length' => '4',
             'barcode_max_interval' => '50',

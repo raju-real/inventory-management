@@ -2,6 +2,9 @@
 <x-page-header :title="$title . ' ' . $invoice->reference_no" :sub="$date->format('d M Y') . ' · recorded by ' . ($invoice->creator?->name ?? '-')">
     <a class="btn btn-light" href="{{ route($prefix . '.index') }}">Back</a>
     <a class="btn btn-outline-primary" target="_blank" rel="noopener" href="{{ route($prefix . '.pdf', $invoice) }}"><i class="bi bi-printer me-1"></i>Print / PDF</a>
+    @if ($prefix === 'sales')
+        <a class="btn btn-outline-primary" target="_blank" rel="noopener" href="{{ route('sales.receipt', $invoice) }}"><i class="bi bi-receipt-cutoff me-1"></i>POS Receipt</a>
+    @endif
     <a class="btn btn-outline-primary" href="{{ route($prefix . '.pdf', [$invoice, 'download' => 1]) }}"><i class="bi bi-download me-1"></i>Download</a>
     <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#emailModal"><i class="bi bi-envelope me-1"></i>Email</button>
     @unless ($invoice->isCancelled())

@@ -1,7 +1,15 @@
 @extends('layouts.app')
 @section('title', 'Dashboard')
 @section('content')
-<x-page-header title="Dashboard" :sub="now()->format('l, d F Y')" />
+<x-page-header title="Dashboard" :sub="now()->format('l, d F Y')">
+    @if (auth()->user()->canAccess('sales', 'create') || auth()->user()->canAccess('purchases', 'create'))
+        <div class="shortcut-hints" aria-label="Keyboard shortcuts">
+            <i class="bi bi-keyboard"></i><span class="d-none d-sm-inline">Shortcuts:</span>
+            @access('sales', 'create')<span><kbd>F4</kbd> New Sale</span>@endaccess
+            @access('purchases', 'create')<span><kbd>F5</kbd> New Purchase</span>@endaccess
+        </div>
+    @endif
+</x-page-header>
 
 <div class="row g-3 mb-3">
     @foreach ([

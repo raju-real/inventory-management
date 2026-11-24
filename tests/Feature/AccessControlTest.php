@@ -62,6 +62,21 @@ class AccessControlTest extends TestCase
         $page->assertSee('data-sidebar-key="sidebar-collapsed:' . $admin->unique_id . '"', false);
     }
 
+    public function test_shortcut_keys_and_dashboard_hints_follow_permissions()
+    {
+        $page = $this->actingAs($this->admin())->get(route('dashboard'))->assertOk();
+        $page->assertSee('data-shortcut="F4"', false)->assertSee('data-shortcut="F5"', false);
+        $page->assertSee('<kbd>F4</kbd> New Sale', false)->assertSee('<kbd>F5</kbd> New Purchase', false);
+
+        $cashier = $this->staff(['dashboard' => ['view'], 'sales' => ['view', 'create']]);
+        $page = $this->actingAs($cashier)->get(route('dashboard'))->assertOk();
+        $page->assertSee('data-shortcut="F4"', false)->assertDontSee('data-shortcut="F5"', false);
+        $page->assertSee('<kbd>F4</kbd> New Sale', false)->assertDontSee('<kbd>F5</kbd>', false);
+
+        $viewer = $this->staff(['dashboard' => ['view']]);
+        $this->actingAs($viewer)->get(route('dashboard'))->assertDontSee('data-shortcut', false)->assertDontSee('Shortcuts:');
+    }
+
     public function test_the_sidebar_only_lists_assigned_menus()
     {
         $user = $this->staff(['sales' => ['view'], 'products' => ['view']]);

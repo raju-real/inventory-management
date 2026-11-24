@@ -63,7 +63,16 @@
             }
         }
 
+        delete form.dataset.dirty;
         window.setSubmitting(form, true);
+    });
+
+    // A form someone has typed into, so leaving by a shortcut can ask first.
+    document.addEventListener('input', function (event) {
+        const form = event.target.form;
+        if (form && form.method.toLowerCase() === 'post') {
+            form.dataset.dirty = '1';
+        }
     });
 
     // Add and New links. Ctrl+click and the like open a new tab, so this page stays as it is.

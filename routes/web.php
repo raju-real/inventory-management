@@ -71,6 +71,7 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::resource('sales', SaleController::class)->only('index', 'create', 'store', 'show');
     Route::post('sales/{sale}/cancel', [SaleController::class, 'cancel'])->name('sales.cancel');
     Route::get('sales/{sale}/pdf', [SaleController::class, 'pdf'])->name('sales.pdf');
+    Route::get('sales/{sale}/receipt', [SaleController::class, 'receipt'])->name('sales.receipt');
     Route::post('sales/{sale}/email', [SaleController::class, 'email'])->name('sales.email');
 
     Route::resource('sales-returns', SalesReturnController::class)->only('index', 'create', 'store', 'show');

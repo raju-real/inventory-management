@@ -47,6 +47,74 @@
         });
     });
 
+    // Tooltips: every .btn with a title shows it, but only while the button shows nothing but an icon.
+    // Shortcut buttons always show theirs, because the key is not written on the button.
+    new bootstrap.Tooltip(document.body, {
+        selector: '.btn[title], .btn[data-bs-original-title]',
+        trigger: 'hover',
+        container: 'body',
+    });
+
+    function visibleText(element) {
+        let text = '';
+        const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+        while (walker.nextNode()) {
+            const parent = walker.currentNode.parentElement;
+            if (parent.closest('.badge') || parent.getClientRects().length === 0) {
+                continue;
+            }
+            text += walker.currentNode.textContent;
+        }
+        return text.trim();
+    }
+
+    document.addEventListener('show.bs.tooltip', function (event) {
+        if (!event.target.hasAttribute('data-shortcut') && visibleText(event.target) !== '') {
+            event.preventDefault();
+        }
+    });
+
+    document.addEventListener('click', function (event) {
+        const button = event.target.closest('.btn');
+        const tooltip = button && bootstrap.Tooltip.getInstance(button);
+        if (tooltip) {
+            tooltip.hide();
+        }
+    });
+
+    // Keyboard shortcuts come from the top bar links (data-shortcut="F4").
+    // A user without the link keeps the key's normal meaning, so F5 still refreshes for them.
+    document.addEventListener('keydown', function (event) {
+        if (event.ctrlKey || event.altKey || event.metaKey || event.shiftKey) {
+            return;
+        }
+        const link = document.querySelector('.topbar a[data-shortcut="' + event.key + '"]');
+        if (!link) {
+            return;
+        }
+        event.preventDefault();
+
+        if (event.repeat || document.body.classList.contains('modal-open')) {
+            return;
+        }
+        if (new URL(link.href).pathname === window.location.pathname) {
+            const search = document.getElementById('product-search');
+            if (search) {
+                search.focus();
+            }
+            return;
+        }
+
+        const unsaved = Array.prototype.some.call(document.querySelectorAll('form[data-dirty]'), function (form) {
+            return !form.closest('.modal');
+        });
+        if (unsaved && !window.confirm('Leave this page? Changes you have not saved will be lost.')) {
+            return;
+        }
+
+        link.click();
+    });
+
     window.Toast = function (message, type) {
         const area = document.querySelector('.toast-area');
         const box = document.createElement('div');

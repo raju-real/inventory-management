@@ -62,13 +62,13 @@
     <header class="topbar">
         <button class="btn btn-light" type="button" data-sidebar-toggle aria-label="Toggle menu" title="Hide or show the menu"><i class="bi bi-list"></i></button>
         @foreach ([
-            ['sales', 'sales.create', 'New Sale', 'bi-receipt', 'btn-primary'],
-            ['purchases', 'purchases.create', 'New Purchase', 'bi-bag-plus', 'btn-outline-primary'],
-            ['incomes', 'incomes.create', 'New Income', 'bi-arrow-down-left-circle', 'btn-outline-primary'],
-            ['expenses', 'expenses.create', 'New Expense', 'bi-arrow-up-right-circle', 'btn-outline-primary'],
-        ] as [$menuKey, $routeName, $text, $icon, $style])
+            ['sales', 'sales.create', 'New Sale', 'bi-receipt', 'btn-primary', 'F4'],
+            ['purchases', 'purchases.create', 'New Purchase', 'bi-bag-plus', 'btn-outline-primary', 'F5'],
+            ['incomes', 'incomes.create', 'New Income', 'bi-arrow-down-left-circle', 'btn-outline-primary', null],
+            ['expenses', 'expenses.create', 'New Expense', 'bi-arrow-up-right-circle', 'btn-outline-primary', null],
+        ] as [$menuKey, $routeName, $text, $icon, $style, $shortcut])
             @access($menuKey, 'create')
-                <a class="btn {{ $style }} btn-submit" href="{{ route($routeName) }}" title="{{ $text }}"><i class="bi {{ $icon }}"></i><span class="d-none d-xl-inline ms-1">{{ $text }}</span></a>
+                <a class="btn {{ $style }} btn-submit" href="{{ route($routeName) }}" title="{{ $text }}{{ $shortcut ? ' (' . $shortcut . ')' : '' }}" @if ($shortcut) data-shortcut="{{ $shortcut }}" aria-keyshortcuts="{{ $shortcut }}" @endif><i class="bi {{ $icon }}"></i><span class="d-none d-xl-inline ms-1">{{ $text }}</span></a>
             @endaccess
         @endforeach
         <div class="ms-auto d-flex align-items-center gap-2">

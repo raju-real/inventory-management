@@ -98,6 +98,54 @@ class InvoiceTest extends TestCase
         $this->post(route('sales.email', Sale::first()), ['email' => "buyer@example.com\r\nBcc: spam@example.com"])->assertSessionHasErrors('email');
     }
 
+    /** Page size in mm from the PDF's MediaBox: [width, height]. */
+    private function pageSize(string $pdf): array
+    {
+        preg_match('/\/MediaBox\s*\[\s*0\s+0\s+([\d.]+)\s+([\d.]+)\s*\]/', $pdf, $box);
+
+        return [round($box[1] * 25.4 / 72), round($box[2] * 25.4 / 72)];
+    }
+
+    public function test_the_pos_receipt_fits_the_paper_and_grows_with_the_items()
+    {
+        $products = collect(range(1, 12))->map(fn ($i) => $this->product(['opening_stock' => 50]));
+        $this->postSale($products[0], 1, ['paid_amount' => 150])->assertSessionHasNoErrors();
+        $this->postSale($products[0], 1, ['items' => $products->map(fn ($p) => ['product_id' => $p->unique_id, 'quantity' => 2, 'unit_price' => 150])->all(), 'discount' => 100]);
+        [$short, $long] = Sale::oldest('id')->get();
+
+        $response = $this->get(route('sales.receipt', $short))->assertOk()->assertHeader('content-type', 'application/pdf');
+        $this->assertStringContainsString('inline', $response->headers->get('content-disposition'));
+        $pdf = $response->getContent();
+        $this->assertStringStartsWith('%PDF', $pdf);
+        [$width, $height] = $this->pageSize($pdf);
+        $this->assertSame(80.0, (float) $width);
+        $this->assertLessThan(200, $height, 'A one-item receipt must not waste paper.');
+
+        [, $longHeight] = $this->pageSize($this->get(route('sales.receipt', $long))->getContent());
+        $this->assertGreaterThan($height + 40, $longHeight, 'More items must make a longer receipt.');
+
+        $this->put(route('settings.update'), ['site_name' => 'Shop', 'currency_symbol' => 'Tk', 'receipt_width' => 58])->assertSessionHasNoErrors();
+        $this->assertSame(58.0, (float) $this->pageSize($this->get(route('sales.receipt', $short))->getContent())[0]);
+        $this->put(route('settings.update'), ['site_name' => 'Shop', 'currency_symbol' => 'Tk', 'receipt_width' => 70])->assertSessionHasErrors('receipt_width');
+    }
+
+    public function test_the_receipt_is_offered_on_sales_only_and_follows_permissions()
+    {
+        $this->postSale($this->product(), 1);
+        $this->postPurchase($this->product(), 1);
+        $sale = Sale::first();
+
+        $this->get(route('sales.show', $sale))->assertSee(route('sales.receipt', $sale))->assertSee('POS Receipt');
+        $this->get(route('sales.index'))->assertSee(route('sales.receipt', $sale));
+        $this->get(route('purchases.show', Purchase::first()))->assertDontSee('POS Receipt');
+
+        $this->post(route('sales.cancel', $sale), ['cancel_reason' => 'x']);
+        $this->assertStringStartsWith('%PDF', $this->get(route('sales.receipt', $sale))->assertOk()->getContent());
+
+        $this->actingAs($this->staff(['products' => ['view']]))->get(route('sales.receipt', $sale))->assertForbidden();
+        $this->get('sales/' . $sale->id . '/receipt')->assertNotFound();
+    }
+
     public function test_a_viewer_without_access_cannot_download_the_invoice()
     {
         $product = $this->product();

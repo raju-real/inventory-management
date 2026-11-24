@@ -48,6 +48,7 @@
 
         modalElement.addEventListener('hidden.bs.modal', function () {
             form.reset();
+            delete form.dataset.dirty;
             clearErrors();
         });
 

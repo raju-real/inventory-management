@@ -29,7 +29,7 @@ class Controller extends BaseController
     /** Maps the standard controller methods to the permission of a menu. */
     protected function accessResource(string $menuKey): void
     {
-        $this->middleware("access:{$menuKey},view")->only(['index', 'show', 'pdf', 'email', 'labels']);
+        $this->middleware("access:{$menuKey},view")->only(['index', 'show', 'pdf', 'receipt', 'email', 'labels']);
         $this->middleware("access:{$menuKey},create")->only(['create', 'store']);
         $this->middleware("access:{$menuKey},edit")->only(['edit', 'update']);
         $this->middleware("access:{$menuKey},delete")->only(['destroy', 'cancel']);

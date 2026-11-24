@@ -59,6 +59,11 @@ class SaleController extends Controller
         return $this->invoices->response($sale->load('customer'), $request->boolean('download'));
     }
 
+    public function receipt(Sale $sale)
+    {
+        return $this->invoices->receipt($sale);
+    }
+
     public function email(InvoiceEmailRequest $request, Sale $sale)
     {
         $data = $request->validated();

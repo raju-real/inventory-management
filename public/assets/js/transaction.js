@@ -177,6 +177,7 @@
             row.querySelector('[data-role="qty"]').select();
         }
 
+        form.dataset.dirty = '1';
         flashRow(row);
         recalculate();
     }

@@ -21,6 +21,7 @@ class SiteSettingRequest extends FormRequest
             'site_website' => ['nullable', 'url', 'max:255'],
             'currency_symbol' => ['required', 'string', 'max:10'],
             'invoice_footer' => ['nullable', 'string', 'max:500'],
+            'receipt_width' => ['nullable', 'in:58,80'],
             'site_logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'site_favicon' => ['nullable', 'file', 'mimes:png,ico,jpg,jpeg', 'max:512'],
         ];
