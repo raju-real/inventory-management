@@ -87,7 +87,7 @@ class StockRulesTest extends TestCase
         $product = $this->product(['opening_stock' => 10]);
 
         $this->postSale($product, 2, [
-            'discount' => 50, 'paid_amount' => 100,
+            'discount_type' => 'flat', 'discount_value' => 50, 'paid_amount' => 100,
             'grand_total' => 1, 'subtotal' => 1, 'due_amount' => 0,
         ])->assertSessionHasNoErrors();
 
@@ -102,7 +102,7 @@ class StockRulesTest extends TestCase
     {
         $product = $this->product(['opening_stock' => 10]);
 
-        $this->postSale($product, 1, ['discount' => 151])->assertSessionHasErrors('discount');
+        $this->postSale($product, 1, ['discount_type' => 'flat', 'discount_value' => 151])->assertSessionHasErrors('discount_value');
         $this->postSale($product, 1, ['paid_amount' => 151])->assertSessionHasErrors('paid_amount');
         $this->assertStock($product, 10);
     }

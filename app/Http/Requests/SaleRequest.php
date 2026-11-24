@@ -16,7 +16,12 @@ class SaleRequest extends BaseRequest
         return [
             'sale_date' => ['required', 'date_format:Y-m-d'],
             'customer_id' => ['required', Rule::exists('customers', 'unique_id')->where('status', true)],
-            'discount' => ['nullable', 'numeric', 'min:0'],
+            'discount_type' => ['nullable', 'in:percentage,flat'],
+            'discount_value' => ['nullable', 'numeric', 'min:0', 'max:999999999'],
+            'vat_mode' => ['nullable', 'in:product,order'],
+            'vat_type' => ['nullable', 'in:percentage,flat'],
+            'vat_value' => ['nullable', 'numeric', 'min:0', 'max:999999999'],
+            'points_redeemed' => ['nullable', 'integer', 'min:0', 'max:999999999'],
             'paid_amount' => ['nullable', 'numeric', 'min:0'],
             'payment_method' => ['nullable', 'in:cash,bank,card,mobile,other'],
             'notes' => ['nullable', 'string', 'max:1000'],
@@ -24,12 +29,14 @@ class SaleRequest extends BaseRequest
             'items.*.product_id' => ['required', Rule::exists('products', 'unique_id')->where('status', true)],
             'items.*.quantity' => ['required', 'numeric', 'gt:0', 'max:99999999'],
             'items.*.unit_price' => ['required', 'numeric', 'min:0', 'max:999999999'],
+            'items.*.vat_type' => ['nullable', 'in:percentage,flat'],
+            'items.*.vat_value' => ['nullable', 'numeric', 'min:0', 'max:999999999'],
         ];
     }
 
     public function attributes()
     {
-        return ['customer_id' => 'customer', 'items.*.product_id' => 'product', 'items.*.quantity' => 'quantity', 'items.*.unit_price' => 'unit price'];
+        return ['customer_id' => 'customer', 'items.*.product_id' => 'product', 'items.*.quantity' => 'quantity', 'items.*.unit_price' => 'unit price', 'items.*.vat_value' => 'VAT', 'discount_value' => 'discount', 'vat_value' => 'VAT'];
     }
 
     public function messages()

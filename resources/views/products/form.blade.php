@@ -20,6 +20,8 @@
                     <div class="col-md-6"><x-select name="unit_id" label="Unit" :options="$units->pluck('name', 'unique_id')" :value="$product->unit?->unique_id" required /></div>
                     <div class="col-md-6"><x-input name="purchase_price" type="number" label="Purchase price" placeholder="0.00" :value="$product->purchase_price" required min="0" step="any" /></div>
                     <div class="col-md-6"><x-input name="sales_price" type="number" label="Sales price" placeholder="0.00" :value="$product->sales_price" required min="0" step="any" /></div>
+                    <div class="col-md-6"><x-select name="vat_type" label="VAT type" :options="['percentage' => 'Percentage (%)', 'flat' => 'Flat amount per unit']" :placeholder="false" :value="$product->vat_type ?? 'percentage'" /></div>
+                    <div class="col-md-6"><x-input name="vat_value" type="number" label="VAT" placeholder="e.g. 15" :value="$product->exists ? (float) $product->vat_value : null" min="0" step="any" help="Used on every sale of this product. It can still be changed on the sale." /></div>
                     <div class="col-md-6"><x-input name="min_stock" type="number" label="Minimum stock alert" placeholder="e.g. 10" :value="$product->exists ? (float) $product->min_stock : null" min="0" step="any" help="A low-stock alert shows at or below this quantity." /></div>
                     <div class="col-md-6">
                         @if ($product->exists)

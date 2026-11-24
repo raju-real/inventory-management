@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\MailSettingRequest;
+use App\Http\Requests\PointSettingRequest;
 use App\Http\Requests\SiteSettingRequest;
+use App\Http\Requests\VatSettingRequest;
 use App\Services\SettingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -25,6 +27,20 @@ class SettingController extends Controller
         $this->service->save($request->validated());
 
         return redirect()->route('settings.edit')->with('success', 'Settings saved.');
+    }
+
+    public function updatePoints(PointSettingRequest $request)
+    {
+        $this->service->save($request->validated());
+
+        return redirect()->route('settings.edit', ['tab' => 'points'])->with('success', 'Point settings saved.');
+    }
+
+    public function updateVat(VatSettingRequest $request)
+    {
+        $this->service->save($request->validated());
+
+        return redirect()->route('settings.edit', ['tab' => 'vat'])->with('success', 'VAT settings saved.');
     }
 
     public function updateMail(MailSettingRequest $request)

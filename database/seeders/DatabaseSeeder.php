@@ -33,7 +33,7 @@ class DatabaseSeeder extends Seeder
             Unit::firstOrCreate(['name' => $name], ['short_name' => $short]);
         }
 
-        Customer::firstOrCreate(['name' => 'Walk-in Customer']);
+        Customer::firstOrCreate(['name' => 'Walk-in Customer'])->forceFill(['is_walk_in' => true])->save();
     }
 
     private function seedMenus(): void
@@ -125,6 +125,13 @@ class DatabaseSeeder extends Seeder
             'currency_symbol' => "\u{09F3}",
             'invoice_footer' => 'Thank you for your business.',
             'receipt_width' => '80',
+            'points_earn_enabled' => '1',
+            'points_earn_amount' => '100',
+            'points_redeem_enabled' => '1',
+            'points_value' => '0.70',
+            'vat_default_mode' => 'product',
+            'vat_default_type' => 'percentage',
+            'vat_default_value' => '0',
             'barcode_enabled' => '1',
             'barcode_min_length' => '4',
             'barcode_max_interval' => '50',

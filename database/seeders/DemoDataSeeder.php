@@ -26,6 +26,7 @@ use App\Services\PaymentService;
 use App\Services\ProductService;
 use App\Services\PurchaseReturnService;
 use App\Services\PurchaseService;
+use App\Services\SaleCalculator;
 use App\Services\SaleService;
 use App\Services\SalesReturnService;
 use App\Services\StockAdjustmentService;
@@ -119,6 +120,8 @@ class DemoDataSeeder extends Seeder
                 'sales_price' => $price,
                 'opening_stock' => $opening,
                 'min_stock' => $minimum,
+                'vat_type' => $categoryName === 'Accessories' ? 'flat' : 'percentage',
+                'vat_value' => ['Electronics' => 5, 'Clothing' => 7.5, 'Accessories' => 10][$categoryName],
                 'description' => "{$name} for everyday use. Sample product for demonstration.",
                 'status' => 1,
             ]);
@@ -149,7 +152,9 @@ class DemoDataSeeder extends Seeder
     private function seedCustomers(): array
     {
         $service = app(CustomerService::class);
-        $customers = [Customer::firstOrCreate(['name' => 'Walk-in Customer'])];
+        $walkIn = Customer::firstOrCreate(['name' => 'Walk-in Customer']);
+        $walkIn->forceFill(['is_walk_in' => true])->save();
+        $customers = [$walkIn];
 
         foreach ([
             ['Rahim Uddin', '01712345601', 'rahim@example.com', 'Mirpur 10, Dhaka', 0],
@@ -234,24 +239,26 @@ class DemoDataSeeder extends Seeder
             }
 
             $items = [];
-            $subtotal = 0;
             foreach ($picked as $product) {
                 $quantity = mt_rand(1, (float) $product->sales_price > 10000 ? 1 : 3);
-                $items[] = ['product_id' => $product->id, 'quantity' => $quantity, 'unit_price' => $product->sales_price];
-                $subtotal += $quantity * (float) $product->sales_price;
+                $items[] = ['product_id' => $product->id, 'quantity' => $quantity, 'unit_price' => $product->sales_price, 'vat_type' => $product->vat_type, 'vat_value' => $product->vat_value];
             }
 
             $customer = $customers[$index % count($customers)];
-            $discount = $index % 4 === 0 ? round($subtotal * 0.05) : 0;
-            $total = $subtotal - $discount;
-            $isWalkIn = $customer->name === 'Walk-in Customer';
-            $paid = $isWalkIn || $index % 3 === 0 ? $total : ($index % 3 === 1 ? round($total * 0.5) : 0);
+            $sale = [
+                'items' => $items,
+                'discount_type' => 'percentage',
+                'discount_value' => $index % 4 === 0 ? 5 : 0,
+                'vat_mode' => $index % 6 === 5 ? 'order' : 'product',
+                'vat_type' => 'percentage',
+                'vat_value' => 5,
+            ];
+            $total = app(SaleCalculator::class)->calculate($sale)['grand_total'];
+            $paid = $customer->is_walk_in || $index % 3 === 0 ? $total : ($index % 3 === 1 ? round($total * 0.5) : 0);
 
-            $service->create([
+            $service->create($sale + [
                 'sale_date' => $this->days($ago),
                 'customer_id' => $customer->id,
-                'items' => $items,
-                'discount' => $discount,
                 'paid_amount' => $paid,
                 'payment_method' => ['cash', 'mobile', 'card', 'bank'][$index % 4],
             ]);
@@ -265,6 +272,14 @@ class DemoDataSeeder extends Seeder
                 'amount' => $sale->due_amount, 'method' => 'mobile', 'transaction_ref' => 'BK' . mt_rand(100000, 999999),
             ]);
         }
+
+        // A loyal customer uses some of their points.
+        $loyal = Customer::where('name', 'Rahim Uddin')->first();
+        $mouse = collect($sellable)->firstWhere('name', 'Wireless Mouse');
+        $useSale = ['items' => [['product_id' => $mouse->id, 'quantity' => 1, 'unit_price' => $mouse->sales_price, 'vat_type' => $mouse->vat_type, 'vat_value' => $mouse->vat_value]], 'discount_type' => 'percentage', 'discount_value' => 0, 'vat_mode' => 'product'];
+        $pointsToUse = min(20, (int) $loyal->fresh()->points);
+        $toPay = app(SaleCalculator::class)->calculate($useSale)['grand_total'] - round($pointsToUse * 0.70, 2);
+        $service->create($useSale + ['sale_date' => $this->days(0), 'customer_id' => $loyal->id, 'points_redeemed' => $pointsToUse, 'paid_amount' => $toPay, 'payment_method' => 'cash']);
 
         // One customer payment on account, with no invoice attached.
         $payments->createCustomerPayment([
@@ -288,7 +303,7 @@ class DemoDataSeeder extends Seeder
         $damaged = $sales[9];
         $returns->create([
             'sale_id' => $damaged->id, 'return_date' => $this->days(7), 'reason' => 'Arrived broken', 'notes' => 'Refund paid in cash.',
-            'refund_amount' => round((float) $damaged->details[0]->unit_price * $damaged->netRatio() / 2),
+            'refund_amount' => round(((float) $damaged->details[0]->unit_price * $damaged->netRatio() + $damaged->details[0]->vat_per_unit) / 2),
             'items' => [['sale_detail_id' => $damaged->details[0]->id, 'quantity' => 1, 'condition' => 'damaged']],
         ]);
 

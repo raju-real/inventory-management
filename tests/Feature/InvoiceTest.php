@@ -13,7 +13,7 @@ class InvoiceTest extends TestCase
     public function test_sales_and_purchase_invoices_render_as_real_pdf_files()
     {
         $product = $this->product();
-        $this->postSale($product, 2, ['discount' => 10, 'paid_amount' => 50, 'notes' => 'Handle with care']);
+        $this->postSale($product, 2, ['discount_type' => 'flat', 'discount_value' => 10, 'paid_amount' => 50, 'notes' => 'Handle with care']);
         $this->postPurchase($product, 3, ['other_charges' => 5]);
 
         foreach ([route('sales.pdf', Sale::first()), route('purchases.pdf', Purchase::first())] as $url) {
@@ -110,7 +110,7 @@ class InvoiceTest extends TestCase
     {
         $products = collect(range(1, 12))->map(fn ($i) => $this->product(['opening_stock' => 50]));
         $this->postSale($products[0], 1, ['paid_amount' => 150])->assertSessionHasNoErrors();
-        $this->postSale($products[0], 1, ['items' => $products->map(fn ($p) => ['product_id' => $p->unique_id, 'quantity' => 2, 'unit_price' => 150])->all(), 'discount' => 100]);
+        $this->postSale($products[0], 1, ['items' => $products->map(fn ($p) => ['product_id' => $p->unique_id, 'quantity' => 2, 'unit_price' => 150])->all(), 'discount_type' => 'flat', 'discount_value' => 100]);
         [$short, $long] = Sale::oldest('id')->get();
 
         $response = $this->get(route('sales.receipt', $short))->assertOk()->assertHeader('content-type', 'application/pdf');

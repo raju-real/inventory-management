@@ -28,7 +28,7 @@ class AppServiceProvider extends ServiceProvider
             Models\Category::class, Models\Unit::class, Models\Product::class, Models\Customer::class, Models\Supplier::class,
             Models\Purchase::class, Models\Sale::class, Models\SalesReturn::class, Models\PurchaseReturn::class, Models\Damage::class,
             Models\StockAdjustment::class, Models\StockTransaction::class, Models\CustomerPayment::class, Models\SupplierPayment::class,
-            Models\BankAccount::class, Models\ExpenseCategory::class, Models\IncomeCategory::class, Models\Expense::class, Models\Income::class,
+            Models\BankAccount::class, Models\ExpenseCategory::class, Models\IncomeCategory::class, Models\Expense::class, Models\Income::class, Models\PointTransaction::class,
         ] as $model) {
             $model::observe(ModelCacheObserver::class);
         }

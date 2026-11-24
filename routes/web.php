@@ -115,6 +115,8 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('settings', [SettingController::class, 'edit'])->name('settings.edit');
     Route::put('settings', [SettingController::class, 'update'])->name('settings.update');
     Route::put('settings/mail', [SettingController::class, 'updateMail'])->name('settings.mail');
+    Route::put('settings/points', [SettingController::class, 'updatePoints'])->name('settings.points');
+    Route::put('settings/vat', [SettingController::class, 'updateVat'])->name('settings.vat');
     Route::post('settings/mail/test', [SettingController::class, 'testMail'])->name('settings.mail.test');
     Route::get('barcode-settings', [BarcodeController::class, 'settings'])->name('barcode.settings');
     Route::put('barcode-settings', [BarcodeController::class, 'update'])->name('barcode.settings.update');

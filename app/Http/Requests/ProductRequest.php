@@ -23,6 +23,8 @@ class ProductRequest extends BaseRequest
             'unit_id' => ['required', Rule::exists('units', 'unique_id')],
             'purchase_price' => ['required', 'numeric', 'min:0', 'max:999999999999'],
             'sales_price' => ['required', 'numeric', 'min:0', 'max:999999999999'],
+            'vat_type' => ['nullable', 'in:percentage,flat'],
+            'vat_value' => ['nullable', 'numeric', 'min:0', 'max:999999999'],
             'min_stock' => ['nullable', 'numeric', 'min:0', 'max:99999999999'],
             'opening_stock' => ['nullable', 'numeric', 'min:0', 'max:99999999999'],
             'description' => ['nullable', 'string', 'max:2000'],
@@ -30,6 +32,15 @@ class ProductRequest extends BaseRequest
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'remove_image' => ['nullable', 'boolean'],
         ];
+    }
+
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            if ($this->input('vat_type', 'percentage') === 'percentage' && (float) $this->input('vat_value') > 100) {
+                $validator->errors()->add('vat_value', 'VAT cannot be more than 100%.');
+            }
+        });
     }
 
     public function attributes()

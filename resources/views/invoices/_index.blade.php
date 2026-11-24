@@ -30,6 +30,7 @@
                         <a class="btn btn-sm btn-light" title="PDF invoice" target="_blank" rel="noopener" href="{{ route($prefix . '.pdf', $row) }}"><i class="bi bi-file-earmark-pdf"></i></a>
                         @if ($prefix === 'sales')
                             <a class="btn btn-sm btn-light" title="POS receipt" target="_blank" rel="noopener" href="{{ route('sales.receipt', $row) }}"><i class="bi bi-receipt-cutoff"></i></a>
+                            <button type="button" class="btn btn-sm btn-light" title="Print POS receipt now" aria-label="Print POS receipt now" data-direct-print="{{ route('sales.receipt', $row) }}"><i class="bi bi-printer-fill"></i></button>
                         @endif
                     </td>
                 </tr>

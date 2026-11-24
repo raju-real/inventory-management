@@ -82,14 +82,65 @@
         }
     });
 
-    // Keyboard shortcuts come from the top bar links (data-shortcut="F4").
+    // Direct print: the receipt PDF loads out of sight and the browser's print dialog opens for it.
+    // window.printPdfFrame is separate so it can be replaced, for example by a print agent.
+    window.printPdfFrame = function (frame) {
+        frame.contentWindow.focus();
+        frame.contentWindow.print();
+    };
+
+    function directPrint(button) {
+        if (button.dataset.printing) {
+            return;
+        }
+        button.dataset.printing = '1';
+        const icon = button.innerHTML;
+        button.innerHTML = '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span>';
+
+        const old = document.getElementById('direct-print-frame');
+        if (old) {
+            old.remove();
+        }
+        const frame = document.createElement('iframe');
+        frame.id = 'direct-print-frame';
+        frame.title = 'Receipt for printing';
+        frame.style.cssText = 'position:fixed;right:0;bottom:0;width:1px;height:1px;border:0;opacity:0;';
+        frame.src = button.dataset.directPrint;
+
+        const done = function () {
+            button.innerHTML = icon;
+            delete button.dataset.printing;
+        };
+        frame.addEventListener('load', function () {
+            // The PDF viewer needs a moment after loading before it can print.
+            setTimeout(function () {
+                try {
+                    window.printPdfFrame(frame);
+                } catch (error) {
+                    window.open(button.dataset.directPrint, '_blank');
+                }
+                done();
+            }, 400);
+        });
+        document.body.appendChild(frame);
+    }
+
+    document.addEventListener('click', function (event) {
+        const button = event.target.closest('[data-direct-print]');
+        if (button) {
+            event.preventDefault();
+            directPrint(button);
+        }
+    });
+
+    // Keyboard shortcuts: top bar links (F4, F5) and page buttons (F9 prints the receipt).
     // A user without the link keeps the key's normal meaning, so F5 still refreshes for them.
     document.addEventListener('keydown', function (event) {
         if (event.ctrlKey || event.altKey || event.metaKey || event.shiftKey) {
             return;
         }
-        const link = document.querySelector('.topbar a[data-shortcut="' + event.key + '"]');
-        if (!link) {
+        const target = document.querySelector('[data-shortcut="' + event.key + '"]');
+        if (!target) {
             return;
         }
         event.preventDefault();
@@ -97,6 +148,11 @@
         if (event.repeat || document.body.classList.contains('modal-open')) {
             return;
         }
+        if (target.tagName !== 'A') {
+            target.click();
+            return;
+        }
+        const link = target;
         if (new URL(link.href).pathname === window.location.pathname) {
             const search = document.getElementById('product-search');
             if (search) {

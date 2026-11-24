@@ -95,7 +95,7 @@ class PaymentAndLedgerTest extends TestCase
     public function test_returned_goods_are_valued_after_the_invoice_discount()
     {
         $product = $this->product();
-        $this->postSale($product, 2, ['discount' => 30]); // 300 - 10 %
+        $this->postSale($product, 2, ['discount_type' => 'percentage', 'discount_value' => 10]); // 300 - 10 %
         $sale = Sale::latest('id')->first();
 
         $this->post(route('sales-returns.store'), [
@@ -111,7 +111,7 @@ class PaymentAndLedgerTest extends TestCase
     {
         $shirt = $this->product(['sales_price' => 800]);
         $tee = $this->product(['sales_price' => 350]);
-        $this->postSale($shirt, 2, ['discount' => 50, 'items' => [
+        $this->postSale($shirt, 2, ['discount_type' => 'flat', 'discount_value' => 50, 'items' => [
             ['product_id' => $shirt->unique_id, 'quantity' => 2, 'unit_price' => 800],
             ['product_id' => $tee->unique_id, 'quantity' => 1, 'unit_price' => 350],
         ]])->assertSessionHasNoErrors();

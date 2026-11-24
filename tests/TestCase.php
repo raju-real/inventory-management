@@ -71,6 +71,8 @@ abstract class TestCase extends BaseTestCase
         return $this->actingAs($this->admin())->post(route('sales.store'), array_merge([
             'sale_date' => now()->toDateString(),
             'customer_id' => ($customer ?? $this->customer())->unique_id,
+            'discount_type' => 'percentage',
+            'vat_mode' => 'product',
             'items' => [['product_id' => $product->unique_id, 'quantity' => $quantity, 'unit_price' => $product->sales_price]],
         ], $extra));
     }

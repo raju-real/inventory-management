@@ -10,7 +10,7 @@ use Illuminate\Validation\ValidationException;
 
 class SalesReturnService extends BaseService
 {
-    public function __construct(private StockService $stock)
+    public function __construct(private StockService $stock, private PointService $points)
     {
     }
 
@@ -81,8 +81,8 @@ class SalesReturnService extends BaseService
                     ]);
                 }
 
-                $unitPrice = $sale->netUnitPrice((float) $detail->unit_price);
-                $lineTotal = $sale->returnLineValue($quantity, (float) $detail->unit_price, $totalAmount);
+                $unitPrice = round($sale->netUnitPrice((float) $detail->unit_price) + $detail->vat_per_unit, 2);
+                $lineTotal = $sale->returnLineValue($quantity, (float) $detail->unit_price, $totalAmount, $detail->vat_per_unit);
                 $condition = $item['condition'] ?? 'good';
 
                 $return->details()->create([
@@ -114,6 +114,7 @@ class SalesReturnService extends BaseService
 
             $return->update(['total_quantity' => $totalQuantity, 'total_amount' => round($totalAmount, 2), 'refund_amount' => $refund]);
             $sale->recalculateBalance();
+            $this->points->syncReturns($sale, $return);
 
             return $return;
         }, 3);
@@ -144,6 +145,7 @@ class SalesReturnService extends BaseService
 
             $return->markCancelled($reason);
             $return->sale->recalculateBalance();
+            $this->points->syncReturns($return->sale, $return);
         }, 3);
     }
 }

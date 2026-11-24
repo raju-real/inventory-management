@@ -22,6 +22,7 @@
                 <tr><td class="text-muted">Category</td><td>{{ $product->category?->name }}</td></tr>
                 <tr><td class="text-muted">Purchase price</td><td>{{ money($product->purchase_price) }}</td></tr>
                 <tr><td class="text-muted">Sales price</td><td>{{ money($product->sales_price) }}</td></tr>
+                <tr><td class="text-muted">VAT</td><td>{{ $product->vat_label }}</td></tr>
                 <tr><td class="text-muted">Minimum stock</td><td>{{ qty($product->min_stock) }}</td></tr>
             </table>
             @if ($product->description)<p class="small text-muted mt-2 mb-0">{{ $product->description }}</p>@endif

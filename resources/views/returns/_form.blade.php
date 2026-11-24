@@ -34,8 +34,11 @@
                             <thead><tr><th>Product</th><th class="text-end">Sold / bought</th><th class="text-end">Can return</th><th class="text-end">Unit value</th><th style="width:120px">Return qty</th>@if ($withCondition)<th style="width:140px">Condition</th>@endif<th class="text-end">Total</th></tr></thead>
                             <tbody>
                             @foreach ($invoiceDoc->details as $i => $detail)
-                                @php $netPrice = $invoiceDoc->netUnitPrice((float) $detail->unit_price); @endphp
-                                <tr data-codes="{{ trim($detail->product->barcode . ' ' . $detail->product->sku) }}" data-price="{{ (float) $detail->unit_price * $invoiceDoc->netRatio() }}">
+                                @php
+                                    $vatPerUnit = $detail->vat_per_unit ?? 0;
+                                    $netPrice = $invoiceDoc->netUnitPrice((float) $detail->unit_price) + $vatPerUnit;
+                                @endphp
+                                <tr data-codes="{{ trim($detail->product->barcode . ' ' . $detail->product->sku) }}" data-price="{{ (float) $detail->unit_price * $invoiceDoc->netRatio() + $vatPerUnit }}">
                                     <td>{{ $detail->product->name }}<div class="small text-muted">{{ $detail->product->sku }} {{ $detail->product->barcode ? '· ' . $detail->product->barcode : '' }}</div>
                                         <input type="hidden" name="items[{{ $i }}][{{ $detailField }}]" value="{{ $detail->unique_id }}">
                                     </td>

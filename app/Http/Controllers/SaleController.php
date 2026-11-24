@@ -8,6 +8,8 @@ use App\Http\Requests\SaleRequest;
 use App\Models\Customer;
 use App\Models\Sale;
 use App\Services\InvoiceService;
+use App\Services\PointService;
+use App\Services\SaleCalculator;
 use App\Services\ProductService;
 use App\Services\SaleService;
 use Illuminate\Http\Request;
@@ -31,6 +33,10 @@ class SaleController extends Controller
     {
         return view('sales.create', [
             'customers' => Customer::cachedActive(),
+            'walkInId' => Customer::cachedActive()->firstWhere('is_walk_in', true)?->unique_id,
+            'pointSettings' => app(PointService::class)->settings(),
+            'vatDefaults' => SaleCalculator::vatDefaults(),
+            'pointBalances' => Customer::cachedActive()->where('is_walk_in', false)->mapWithKeys(fn ($customer) => [$customer->unique_id => (int) $customer->points]),
             'oldItems' => $products->hydrateOldItems(old('items', []), 'sale'),
         ]);
     }
@@ -39,7 +45,7 @@ class SaleController extends Controller
     {
         $sale = $this->service->create($request->validated());
 
-        return redirect()->route('sales.show', $sale)->with('success', "Sale {$sale->reference_no} saved and stock updated.");
+        return redirect()->route('sales.show', $sale)->with('success', "Sale {$sale->reference_no} saved and stock updated. Press F9 to print the receipt.");
     }
 
     public function show(Sale $sale)

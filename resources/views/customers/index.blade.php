@@ -10,7 +10,7 @@
 <div class="card">
     <div class="table-responsive">
         <table class="table">
-            <thead><tr><th>Customer</th><th>Mobile</th><th>Email</th><th class="text-end">Outstanding</th><th>Status</th><th></th></tr></thead>
+            <thead><tr><th>Customer</th><th>Mobile</th><th>Email</th><th class="text-end">Points</th><th class="text-end">Outstanding</th><th>Status</th><th></th></tr></thead>
             <tbody>
             @forelse ($customers as $customer)
                 <tr>
@@ -22,6 +22,7 @@
                     </td>
                     <td>{{ $customer->mobile }}</td>
                     <td>{{ $customer->email }}</td>
+                    <td class="num">{{ $customer->is_walk_in ? '' : number_format($customer->points) }}</td>
                     <td class="num {{ $customer->balance > 0 ? 'out' : '' }}">{{ number_format($customer->balance, 2) }}</td>
                     <td><x-status :active="$customer->status" /></td>
                     <td class="table-actions">
@@ -30,7 +31,7 @@
                     </td>
                 </tr>
             @empty
-                <x-empty-row :cols="6" />
+                <x-empty-row :cols="7" />
             @endforelse
             </tbody>
         </table>

@@ -160,7 +160,7 @@ class CrudAndFormsTest extends TestCase
     {
         $this->actingAs($this->admin());
 
-        $this->postJson(route('customers.store'), ['name' => 'New Buyer', 'mobile' => '01700000000', 'status' => 1])
+        $this->postJson(route('customers.store'), ['mobile' => '01700000001', 'name' => 'New Buyer', 'mobile' => '01700000000', 'status' => 1])
             ->assertCreated()->assertJson(['name' => 'New Buyer', 'label' => 'New Buyer (01700000000)']);
         $this->postJson(route('suppliers.store'), ['name' => 'New Vendor', 'status' => 1])
             ->assertCreated()->assertJson(['label' => 'New Vendor']);
@@ -179,7 +179,7 @@ class CrudAndFormsTest extends TestCase
         $clerk = $this->staff(['sales' => ['view', 'create']]);
         $page = $this->actingAs($clerk)->get(route('sales.create'))->assertOk();
         $page->assertDontSee('id="partyModal"', false)->assertSee('New Sale')->assertDontSee('New Purchase');
-        $this->postJson(route('customers.store'), ['name' => 'Sneaky', 'status' => 1])->assertForbidden();
+        $this->postJson(route('customers.store'), ['mobile' => '01700000001', 'name' => 'Sneaky', 'status' => 1])->assertForbidden();
 
         $viewer = $this->staff(['products' => ['view']]);
         $this->actingAs($viewer)->get(route('products.index'))->assertDontSee('New Sale')->assertDontSee('New Purchase');
@@ -201,7 +201,7 @@ class CrudAndFormsTest extends TestCase
 
     public function test_html_in_user_input_is_escaped()
     {
-        $this->actingAs($this->admin())->post(route('customers.store'), ['name' => '<script>alert(1)</script>', 'status' => 1])->assertSessionHasNoErrors();
+        $this->actingAs($this->admin())->post(route('customers.store'), ['mobile' => '01700000001', 'name' => '<script>alert(1)</script>', 'status' => 1])->assertSessionHasNoErrors();
 
         $this->get(route('customers.index'))->assertDontSee('<script>alert(1)</script>', false)->assertSee('&lt;script&gt;', false);
     }
@@ -211,25 +211,25 @@ class CrudAndFormsTest extends TestCase
         Storage::fake('public');
         $this->actingAs($this->admin());
 
-        $this->post(route('customers.store'), ['name' => 'No Image', 'status' => 1])->assertSessionHasNoErrors();
-        $this->post(route('customers.store'), ['name' => 'Has Image', 'status' => 1, 'image' => UploadedFile::fake()->image('a.jpg')])->assertSessionHasNoErrors();
+        $this->post(route('customers.store'), ['mobile' => '01700000001', 'name' => 'No Image', 'status' => 1])->assertSessionHasNoErrors();
+        $this->post(route('customers.store'), ['mobile' => '01700000001', 'name' => 'Has Image', 'status' => 1, 'image' => UploadedFile::fake()->image('a.jpg')])->assertSessionHasNoErrors();
         $customer = Customer::where('name', 'Has Image')->first();
         Storage::disk('public')->assertExists($customer->image);
         $old = $customer->image;
 
-        $this->put(route('customers.update', $customer), ['name' => 'Has Image', 'status' => 1, 'image' => UploadedFile::fake()->image('b.png')])->assertSessionHasNoErrors();
+        $this->put(route('customers.update', $customer), ['mobile' => '01700000001', 'name' => 'Has Image', 'status' => 1, 'image' => UploadedFile::fake()->image('b.png')])->assertSessionHasNoErrors();
         $customer->refresh();
         Storage::disk('public')->assertMissing($old);
         Storage::disk('public')->assertExists($customer->image);
 
         // Saving without a new file keeps the image.
-        $this->put(route('customers.update', $customer), ['name' => 'Renamed', 'status' => 1])->assertSessionHasNoErrors();
+        $this->put(route('customers.update', $customer), ['mobile' => '01700000001', 'name' => 'Renamed', 'status' => 1])->assertSessionHasNoErrors();
         $this->assertNotNull($customer->fresh()->image);
 
-        $this->put(route('customers.update', $customer), ['name' => 'Renamed', 'status' => 1, 'remove_image' => 1])->assertSessionHasNoErrors();
+        $this->put(route('customers.update', $customer), ['mobile' => '01700000001', 'name' => 'Renamed', 'status' => 1, 'remove_image' => 1])->assertSessionHasNoErrors();
         $this->assertNull($customer->fresh()->image);
 
-        $this->post(route('customers.store'), ['name' => 'Bad', 'status' => 1, 'image' => UploadedFile::fake()->create('x.pdf', 10, 'application/pdf')])->assertSessionHasErrors('image');
+        $this->post(route('customers.store'), ['mobile' => '01700000001', 'name' => 'Bad', 'status' => 1, 'image' => UploadedFile::fake()->create('x.pdf', 10, 'application/pdf')])->assertSessionHasErrors('image');
         $this->post(route('suppliers.store'), ['name' => 'Big', 'status' => 1, 'image' => UploadedFile::fake()->image('big.jpg')->size(3000)])->assertSessionHasErrors('image');
         $this->post(route('suppliers.store'), ['name' => 'Svg', 'status' => 1, 'image' => UploadedFile::fake()->create('x.svg', 1, 'image/svg+xml')])->assertSessionHasErrors('image');
 

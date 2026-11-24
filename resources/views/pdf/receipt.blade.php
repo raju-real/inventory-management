@@ -50,7 +50,7 @@
     @foreach ($sale->details as $detail)
         <tr><td colspan="2" class="item">{{ $detail->product?->name }}</td></tr>
         <tr>
-            <td class="small">{{ qty($detail->quantity) }} {{ $detail->product?->unit?->short_name }} x {{ number_format($detail->unit_price, 2) }}</td>
+            <td class="small">{{ qty($detail->quantity) }} {{ $detail->product?->unit?->short_name }} x {{ number_format($detail->unit_price, 2) }}@if ($sale->vat_mode === 'product' && (float) $detail->vat_amount > 0) + VAT {{ number_format($detail->vat_amount, 2) }}@endif</td>
             <td class="right">{{ number_format($detail->total, 2) }}</td>
         </tr>
     @endforeach
@@ -60,13 +60,22 @@
 <table>
     <tr><td>Items / quantity</td><td class="right">{{ $sale->details->count() }} / {{ qty($sale->total_quantity) }}</td></tr>
     <tr><td>Subtotal</td><td class="right">{!! $amount($sale->subtotal) !!}</td></tr>
-    @if ((float) $sale->discount > 0)<tr><td>Discount</td><td class="right">- {!! $amount($sale->discount) !!}</td></tr>@endif
+    @if ((float) $sale->discount > 0)<tr><td>{{ $sale->discount_label }}</td><td class="right">- {!! $amount($sale->discount) !!}</td></tr>@endif
+    @if ((float) $sale->vat_amount > 0)<tr><td>{{ $sale->vat_label }}</td><td class="right">{!! $amount($sale->vat_amount) !!}</td></tr>@endif
     <tr class="grand"><td>TOTAL</td><td class="right">{!! $amount($sale->grand_total) !!}</td></tr>
+    @if ((float) $sale->points_amount > 0)<tr><td>Points used ({{ $sale->points_redeemed }})</td><td class="right">- {!! $amount($sale->points_amount) !!}</td></tr>@endif
     <tr><td>Paid{{ $methods ? ' (' . $methods . ')' : '' }}</td><td class="right">{!! $amount($sale->paid_amount) !!}</td></tr>
     @if ((float) $sale->returned_amount > 0)<tr><td>Returned</td><td class="right">{!! $amount($sale->returned_amount) !!}</td></tr>@endif
     <tr><td><b>Due</b></td><td class="right"><b>{!! $amount($sale->due_amount) !!}</b></td></tr>
 </table>
 
+@if ($sale->customer && ! $sale->customer->is_walk_in)
+    <div class="rule"></div>
+    <table>
+        @if ($sale->points_earned)<tr><td>Points earned</td><td class="right">{{ number_format($sale->points_earned) }}</td></tr>@endif
+        <tr><td><b>Points balance</b></td><td class="right"><b>{{ number_format($sale->customer->points) }}</b></td></tr>
+    </table>
+@endif
 <div class="rule"></div>
 <div class="center"><barcode code="{{ $sale->reference_no }}" type="C128A" size="{{ $width === 58 ? '0.62' : '0.8' }}" height="0.7" /></div>
 @if (setting('invoice_footer'))<div class="center small" style="margin-top: 1.5mm;">{{ setting('invoice_footer') }}</div>@endif

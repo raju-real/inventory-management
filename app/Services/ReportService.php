@@ -22,21 +22,27 @@ class ReportService extends BaseService
         return $this->stock->overview($filters + ['low_stock' => 1]);
     }
 
+    /** Extra figures each report shows between quantity and total: column => [label, money or count]. */
+    private const PURCHASE_COLUMNS = ['subtotal' => ['Subtotal', 'money'], 'discount' => ['Discount', 'money'], 'other_charges' => ['Other charges', 'money']];
+    private const SALE_COLUMNS = ['subtotal' => ['Subtotal', 'money'], 'discount' => ['Discount', 'money'], 'vat_amount' => ['VAT', 'money'],
+        'points_amount' => ['Points used', 'money'], 'points_earned' => ['Points earned', 'count']];
+
     public function purchases(array $filters): array
     {
-        return $this->invoices(Purchase::class, 'purchase_date', 'supplier_id', 'suppliers', $filters);
+        return $this->invoices(Purchase::class, 'purchase_date', 'supplier_id', 'suppliers', $filters, self::PURCHASE_COLUMNS);
     }
 
     public function sales(array $filters): array
     {
-        return $this->invoices(Sale::class, 'sale_date', 'customer_id', 'customers', $filters);
+        return $this->invoices(Sale::class, 'sale_date', 'customer_id', 'customers', $filters, self::SALE_COLUMNS);
     }
 
     /** Invoice wise, date wise or party wise report for purchases and sales. */
-    private function invoices(string $model, string $dateColumn, string $partyColumn, string $partyTable, array $filters): array
+    private function invoices(string $model, string $dateColumn, string $partyColumn, string $partyTable, array $filters, array $columns): array
     {
-        return $model::rememberCache('report:' . $this->listKey($filters), function () use ($model, $dateColumn, $partyColumn, $partyTable, $filters) {
+        return $model::rememberCache('report:' . $this->listKey($filters), function () use ($model, $dateColumn, $partyColumn, $partyTable, $filters, $columns) {
             $table = (new $model())->getTable();
+            $sums = collect(array_keys($columns))->map(fn ($column) => "COALESCE(SUM({$table}.{$column}), 0) AS {$column}")->join(', ');
             $base = $model::query()
                 ->join($partyTable, "{$table}.{$partyColumn}", '=', "{$partyTable}.id")
                 ->where("{$table}.status", 'posted');
@@ -51,12 +57,12 @@ class ReportService extends BaseService
                 $base->where("{$table}.{$partyColumn}", $filters['party_id']);
             }
 
-            $totals = (clone $base)->selectRaw("COUNT(*) AS invoices, COALESCE(SUM({$table}.total_quantity), 0) AS quantity,
+            $totals = (clone $base)->selectRaw("COUNT(*) AS invoices, COALESCE(SUM({$table}.total_quantity), 0) AS quantity, {$sums},
                 COALESCE(SUM({$table}.grand_total), 0) AS total, COALESCE(SUM({$table}.paid_amount), 0) AS paid,
                 COALESCE(SUM({$table}.due_amount), 0) AS due")->toBase()->first();
 
             $group = $filters['group'] ?? 'invoice';
-            $aggregates = "COUNT(*) AS invoices, SUM({$table}.total_quantity) AS quantity, SUM({$table}.grand_total) AS total,
+            $aggregates = "COUNT(*) AS invoices, SUM({$table}.total_quantity) AS quantity, {$sums}, SUM({$table}.grand_total) AS total,
                 SUM({$table}.paid_amount) AS paid, SUM({$table}.due_amount) AS due";
 
             if ($group === 'date') {
@@ -66,12 +72,14 @@ class ReportService extends BaseService
                 $rows = $base->selectRaw("{$partyTable}.name AS label, {$aggregates}")
                     ->groupBy("{$partyTable}.id", "{$partyTable}.name")->orderBy("{$partyTable}.name");
             } else {
-                $rows = $base->select("{$table}.reference_no", "{$table}.{$dateColumn} AS invoice_date", "{$partyTable}.name AS party_name",
-                    "{$table}.total_quantity AS quantity", "{$table}.grand_total AS total", "{$table}.paid_amount AS paid", "{$table}.due_amount AS due")
-                    ->orderByDesc("{$table}.id");
+                $rows = $base->select(array_merge(
+                    ["{$table}.reference_no", "{$table}.{$dateColumn} AS invoice_date", "{$partyTable}.name AS party_name", "{$table}.total_quantity AS quantity"],
+                    array_map(fn ($column) => "{$table}.{$column}", array_keys($columns)),
+                    ["{$table}.grand_total AS total", "{$table}.paid_amount AS paid", "{$table}.due_amount AS due"]
+                ))->orderByDesc("{$table}.id");
             }
 
-            return ['rows' => $rows->toBase()->paginate(static::PER_PAGE)->withQueryString(), 'totals' => $totals];
+            return ['rows' => $rows->toBase()->paginate(static::PER_PAGE)->withQueryString(), 'totals' => $totals, 'columns' => $columns];
         });
     }
 

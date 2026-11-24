@@ -116,7 +116,7 @@ class UniqueIdTest extends TestCase
 
         $this->getJson(route('products.lookup', ['code' => '123456789', 'context' => 'sale']))->assertJson(['id' => $product->unique_id]);
         $this->getJson(route('products.search', ['q' => $product->name, 'context' => 'sale']))->assertJsonPath('0.id', $product->unique_id);
-        $this->postJson(route('customers.store'), ['name' => 'Buyer', 'status' => 1])->assertCreated()->assertJson(['id' => Customer::where('name', 'Buyer')->value('unique_id')]);
+        $this->postJson(route('customers.store'), ['mobile' => '01700000001', 'name' => 'Buyer', 'status' => 1])->assertCreated()->assertJson(['id' => Customer::where('name', 'Buyer')->value('unique_id')]);
     }
 
     public function test_pages_contain_no_numeric_record_ids()

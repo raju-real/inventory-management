@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CustomerRequest;
 use App\Models\Customer;
 use App\Services\CustomerService;
+use App\Services\PointService;
 use Illuminate\Http\Request;
 
 class CustomerController extends Controller
@@ -46,6 +47,8 @@ class CustomerController extends Controller
             'customer' => $customer,
             'sales' => $customer->sales()->latest('id')->paginate(10, ['*'], 'sales_page'),
             'returns' => $customer->salesReturns()->with('sale')->latest('id')->paginate(10, ['*'], 'returns_page'),
+            'pointHistory' => $customer->pointTransactions()->with('sale')->latest('id')->paginate(10, ['*'], 'points_page'),
+            'pointValue' => app(PointService::class)->settings()['point_value'],
         ]);
     }
 

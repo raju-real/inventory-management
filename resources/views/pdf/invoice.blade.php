@@ -72,6 +72,7 @@
                 @if ($party->address)<div class="muted">{{ $party->address }}</div>@endif
                 @if ($party->mobile)<div class="muted">{{ $party->mobile }}</div>@endif
                 @if ($party->email)<div class="muted">{{ $party->email }}</div>@endif
+                @if ($invoice instanceof \App\Models\Sale && ! $party->is_walk_in)<div class="muted">Points balance: {{ number_format($party->points) }}{{ $invoice->points_earned ? ' (earned ' . $invoice->points_earned . ' on this invoice)' : '' }}</div>@endif
             </td>
             <td style="width:45%; text-align:right;">
                 <table class="meta-table">
@@ -93,9 +94,11 @@
         <thead>
             <tr>
                 <th style="width:5%" class="center">#</th>
-                <th style="width:45%">Product</th>
+                @php $lineVat = $invoice instanceof \App\Models\Sale && $invoice->vat_mode === 'product' && (float) $invoice->vat_amount > 0; @endphp
+                <th style="width:{{ $lineVat ? '35' : '45' }}%">Product</th>
                 <th style="width:15%" class="right">Quantity</th>
                 <th style="width:17%" class="right">Unit Price</th>
+                @if ($lineVat)<th style="width:10%" class="right">VAT</th>@endif
                 <th style="width:18%" class="right">Amount</th>
             </tr>
         </thead>
@@ -106,6 +109,7 @@
                     <td>{{ $detail->product?->name }}<br><span class="sku">{{ $detail->product?->sku }}</span></td>
                     <td class="right">{{ qty($detail->quantity) }} {{ $detail->product?->unit?->short_name }}</td>
                     <td class="right">{{ number_format($detail->unit_price, 2) }}</td>
+                    @if ($lineVat)<td class="right">{{ number_format($detail->vat_amount, 2) }}</td>@endif
                     <td class="right">{{ number_format($detail->total, 2) }}</td>
                 </tr>
             @endforeach
@@ -124,9 +128,11 @@
                 <table class="totals">
                     <tr><td>Total quantity</td><td class="right">{{ qty($invoice->total_quantity) }}</td></tr>
                     <tr><td>Subtotal</td><td class="right">{{ money($invoice->subtotal) }}</td></tr>
-                    @if ((float) $invoice->discount > 0)<tr><td>Discount</td><td class="right">- {{ money($invoice->discount) }}</td></tr>@endif
+                    @if ((float) $invoice->discount > 0)<tr><td>{{ $invoice instanceof \App\Models\Sale ? $invoice->discount_label : 'Discount' }}</td><td class="right">- {{ money($invoice->discount) }}</td></tr>@endif
                     @if ((float) ($invoice->other_charges ?? 0) > 0)<tr><td>Other charges</td><td class="right">{{ money($invoice->other_charges) }}</td></tr>@endif
+                    @if ((float) ($invoice->vat_amount ?? 0) > 0)<tr><td>{{ $invoice->vat_label }}</td><td class="right">{{ money($invoice->vat_amount) }}</td></tr>@endif
                     <tr class="grand"><td>Grand Total</td><td class="right">{!! $amount($invoice->grand_total) !!}</td></tr>
+                    @if ((float) ($invoice->points_amount ?? 0) > 0)<tr><td>Points used ({{ $invoice->points_redeemed }})</td><td class="right">- {{ money($invoice->points_amount) }}</td></tr>@endif
                     <tr><td>Paid</td><td class="right">{{ money($invoice->paid_amount) }}</td></tr>
                     @if ((float) $invoice->returned_amount > 0)<tr><td>Returned</td><td class="right">{{ money($invoice->returned_amount) }}</td></tr>@endif
                     <tr class="due"><td>Balance Due</td><td class="right">{!! $amount($invoice->due_amount) !!}</td></tr>

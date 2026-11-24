@@ -11,7 +11,7 @@
                 @if ($mode === 'purchase')
                     <x-input name="contact_person" id="party_contact" label="Contact person" placeholder="e.g. Karim Ahmed" maxlength="255" />
                 @endif
-                <x-input name="mobile" id="party_mobile" label="Mobile number" placeholder="e.g. 01712345678" pattern="[0-9+\-\s\(\)]{6,20}" feedback="Enter a valid mobile number (6-20 digits)." />
+                <x-input name="mobile" id="party_mobile" label="Mobile number" placeholder="e.g. 01712345678" :required="$mode === 'sale'" pattern="[0-9+\-\s\(\)]{6,20}" feedback="Enter a valid mobile number (6-20 digits)." />
                 <x-input name="email" id="party_email" type="email" label="Email" :placeholder="strtolower($partyWord) . '@example.com'" maxlength="255" />
                 <x-input name="address" id="party_address" label="Address" placeholder="Street, area, city" maxlength="255" wrapper="mb-0" />
             </div>

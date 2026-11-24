@@ -38,6 +38,29 @@
     </table></div>
     <x-pagination :items="$sales" />
 </div>
+@unless ($customer->is_walk_in)
+    <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-stars me-1"></i>Loyalty points</span>
+            <span class="badge tone-teal fs-6">{{ number_format($customer->points) }} points · {{ money($customer->points * $pointValue) }}</span>
+        </div>
+        <div class="table-responsive"><table class="table">
+            <thead><tr><th>Date</th><th>What happened</th><th>Invoice</th><th>Note</th><th class="text-end">Points</th></tr></thead>
+            <tbody>
+            @forelse ($pointHistory as $entry)
+                <tr>
+                    <td>{{ $entry->created_at->format('d M Y h:i A') }}</td>
+                    <td>{{ $entry->type_label }}</td>
+                    <td>{{ $entry->sale?->reference_no }}</td>
+                    <td>{{ $entry->remarks }}{{ (float) $entry->amount > 0 ? ' (' . money($entry->amount) . ')' : '' }}</td>
+                    <td class="num {{ $entry->points > 0 ? 'in' : 'out' }}">{{ $entry->points > 0 ? '+' : '' }}{{ number_format($entry->points) }}</td>
+                </tr>
+            @empty <x-empty-row :cols="5" text="No points yet." /> @endforelse
+            </tbody>
+        </table></div>
+        <x-pagination :items="$pointHistory" />
+    </div>
+@endunless
 <div class="card">
     <div class="card-header">Return history</div>
     <div class="table-responsive"><table class="table">

@@ -9,7 +9,13 @@ class SaleDetail extends Model
 {
     use HasUniqueId;
 
-    protected $fillable = ['sale_id', 'product_id', 'quantity', 'returned_quantity', 'unit_price', 'total'];
+    protected $fillable = ['sale_id', 'product_id', 'quantity', 'returned_quantity', 'unit_price', 'total', 'vat_type', 'vat_value', 'vat_amount'];
+
+    /** VAT charged on one unit of this line. */
+    public function getVatPerUnitAttribute(): float
+    {
+        return (float) $this->quantity > 0 ? (float) $this->vat_amount / (float) $this->quantity : 0;
+    }
 
     public function product()
     {

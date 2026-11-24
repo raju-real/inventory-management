@@ -27,7 +27,9 @@ class DemoDataTest extends TestCase
         $this->assertGreaterThan(5, Customer::count());
         $this->assertSame(4, Supplier::count());
         $this->assertSame(5, Purchase::count());
-        $this->assertSame(24, Sale::count());
+        $this->assertSame(25, Sale::count());
+        $this->assertSame(1, Sale::where('points_redeemed', '>', 0)->count(), 'One demo sale is paid partly with points.');
+        $this->assertGreaterThan(0, Customer::where('points', '>', 0)->count());
 
         foreach (Product::all() as $product) {
             Storage::disk('public')->assertExists($product->image);

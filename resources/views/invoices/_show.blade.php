@@ -4,6 +4,7 @@
     <a class="btn btn-outline-primary" target="_blank" rel="noopener" href="{{ route($prefix . '.pdf', $invoice) }}"><i class="bi bi-printer me-1"></i>Print / PDF</a>
     @if ($prefix === 'sales')
         <a class="btn btn-outline-primary" target="_blank" rel="noopener" href="{{ route('sales.receipt', $invoice) }}"><i class="bi bi-receipt-cutoff me-1"></i>POS Receipt</a>
+        <button type="button" class="btn btn-primary" title="Print POS receipt now (F9)" aria-label="Print POS receipt now" data-direct-print="{{ route('sales.receipt', $invoice) }}" data-shortcut="F9" aria-keyshortcuts="F9"><i class="bi bi-printer-fill"></i></button>
     @endif
     <a class="btn btn-outline-primary" href="{{ route($prefix . '.pdf', [$invoice, 'download' => 1]) }}"><i class="bi bi-download me-1"></i>Download</a>
     <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#emailModal"><i class="bi bi-envelope me-1"></i>Email</button>
@@ -28,7 +29,7 @@
             <div class="card-header">Products</div>
             <div class="table-responsive">
                 <table class="table">
-                    <thead><tr><th>Product</th><th class="text-end">Quantity</th><th class="text-end">Returned</th><th class="text-end">Unit price</th><th class="text-end">Total</th></tr></thead>
+                    <thead><tr><th>Product</th><th class="text-end">Quantity</th><th class="text-end">Returned</th><th class="text-end">Unit price</th>@if ($prefix === 'sales')<th class="text-end">VAT</th>@endif<th class="text-end">Total</th></tr></thead>
                     <tbody>
                     @foreach ($invoice->details as $detail)
                         <tr>
@@ -36,6 +37,7 @@
                             <td class="num">{{ qty($detail->quantity) }} {{ $detail->product?->unit?->short_name }}</td>
                             <td class="num">{{ qty($detail->returned_quantity) }}</td>
                             <td class="num">{{ number_format($detail->unit_price, 2) }}</td>
+                            @if ($prefix === 'sales')<td class="num">{{ number_format($detail->vat_amount, 2) }}</td>@endif
                             <td class="num">{{ number_format($detail->total, 2) }}</td>
                         </tr>
                     @endforeach
@@ -85,13 +87,18 @@
             <div class="small text-muted">{{ $party->mobile }}</div>
             <div class="small text-muted">{{ $party->email }}</div>
             <div class="small text-muted">{{ $party->address }}</div>
+            @if ($prefix === 'sales' && ! $party->is_walk_in)
+                <div class="small mt-2"><i class="bi bi-stars me-1"></i>Points balance: <b>{{ number_format($party->points) }}</b>@if ($invoice->points_earned) · earned {{ $invoice->points_earned }} on this sale @endif</div>
+            @endif
         </div></div>
         <div class="card"><div class="card-header d-flex justify-content-between"><span>Summary</span>@unless ($invoice->isCancelled())<x-pay-status :status="$invoice->payment_status" />@endunless</div><div class="card-body">
             <div class="summary-row"><span>Total quantity</span><span>{{ qty($invoice->total_quantity) }}</span></div>
             <div class="summary-row"><span>Subtotal</span><span>{{ money($invoice->subtotal) }}</span></div>
-            <div class="summary-row"><span>Discount</span><span>- {{ money($invoice->discount) }}</span></div>
+            <div class="summary-row"><span>{{ $prefix === 'sales' ? $invoice->discount_label : 'Discount' }}</span><span>- {{ money($invoice->discount) }}</span></div>
+            @if ($prefix === 'sales')<div class="summary-row"><span>{{ $invoice->vat_label }}</span><span>+ {{ money($invoice->vat_amount) }}</span></div>@endif
             @if ((float) ($invoice->other_charges ?? 0) > 0)<div class="summary-row"><span>Other charges</span><span>{{ money($invoice->other_charges) }}</span></div>@endif
             <div class="summary-row total"><span>Grand total</span><span>{{ money($invoice->grand_total) }}</span></div>
+            @if ((float) ($invoice->points_amount ?? 0) > 0)<div class="summary-row"><span>Points used ({{ $invoice->points_redeemed }})</span><span>- {{ money($invoice->points_amount) }}</span></div>@endif
             <div class="summary-row"><span>Paid</span><span>{{ money($invoice->paid_amount) }}</span></div>
             @if ((float) $invoice->returned_amount > 0)<div class="summary-row"><span>Returned (net of refunds)</span><span>{{ money($invoice->returned_amount) }}</span></div>@endif
             <div class="summary-row fw-semibold"><span>Due</span><span class="{{ (float) $invoice->due_amount > 0 ? 'out' : '' }}">{{ money($invoice->due_amount) }}</span></div>

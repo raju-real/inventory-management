@@ -39,7 +39,7 @@ class ProductService extends BaseService
     public function create(array $data): Product
     {
         return DB::transaction(function () use ($data) {
-            $data = $this->images->resolve($data, null, 'products');
+            $data = $this->withVatDefaults($this->images->resolve($data, null, 'products'));
             $opening = (float) ($data['opening_stock'] ?? 0);
 
             $product = Product::create(array_merge($data, [
@@ -67,12 +67,20 @@ class ProductService extends BaseService
     {
         // Stock figures only ever change through stock transactions.
         unset($data['opening_stock'], $data['current_stock']);
-        $data = $this->images->resolve($data, $product, 'products');
+        $data = $this->withVatDefaults($this->images->resolve($data, $product, 'products'));
         $data['sku'] = $data['sku'] ?? $product->sku;
         $data['min_stock'] = $data['min_stock'] ?? 0;
         $product->update($data);
 
         return $product;
+    }
+
+    private function withVatDefaults(array $data): array
+    {
+        $data['vat_type'] = $data['vat_type'] ?? 'percentage';
+        $data['vat_value'] = $data['vat_value'] ?? 0;
+
+        return $data;
     }
 
     public function delete(Product $product): void
@@ -123,6 +131,8 @@ class ProductService extends BaseService
             'unit' => $product->unit?->short_name ?: $product->unit?->name,
             'available' => (float) $product->current_stock,
             'price' => (float) ($context === 'purchase' ? $product->purchase_price : ($context === 'sale' ? $product->sales_price : 0)),
+            'vat_type' => $product->vat_type,
+            'vat_value' => (float) $product->vat_value,
         ];
     }
 
@@ -137,6 +147,8 @@ class ProductService extends BaseService
                 'quantity' => $item['quantity'] ?? 1,
                 'price' => $item['unit_price'] ?? 0,
                 'reason' => $item['reason'] ?? '',
+                'vat_type' => $item['vat_type'] ?? $products[$item['product_id']]->vat_type,
+                'vat_value' => $item['vat_value'] ?? (float) $products[$item['product_id']]->vat_value,
             ]))
             ->values()
             ->all();

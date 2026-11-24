@@ -207,6 +207,19 @@ body { font-size: .9rem; background: var(--page); }
 .summary-row { display: flex; justify-content: space-between; align-items: center; padding: .3rem 0; }
 .summary-row.total { font-size: 1.1rem; font-weight: 700; border-top: 1px dashed var(--line); margin-top: .35rem; padding-top: .55rem; }
 .summary-row input { max-width: 150px; text-align: right; }
+.summary-input { max-width: 170px; }
+.summary-input .form-select { max-width: 76px; flex: 0 0 76px; }
+.line-vat { min-width: 150px; }
+.line-vat .form-select { max-width: 72px; flex: 0 0 72px; }
+/* These type pickers are too narrow for a validation tick as well as their text, so they keep only the arrow. */
+.summary-input .form-select, .line-vat .form-select,
+.was-validated .summary-input .form-select:valid:not([multiple]):not([size]),
+.was-validated .line-vat .form-select:valid:not([multiple]):not([size]) {
+    --bs-form-select-bg-icon: none; padding-left: .5rem; padding-right: 1.6rem; background-position: right .45rem center;
+}
+.points-box { background: var(--brand-soft); border: 1px solid #99f6e4; border-radius: 10px; padding: .6rem .75rem; margin-bottom: .75rem; }
+.points-box .summary-row input { max-width: 110px; }
+.line-vat-amount { font-size: .72rem; color: var(--muted); }
 .scan-log { font-family: ui-monospace, Consolas, monospace; font-size: .8rem; max-height: 220px; overflow-y: auto; }
 
 /* Access tree */

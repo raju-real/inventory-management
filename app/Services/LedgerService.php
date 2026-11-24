@@ -16,6 +16,9 @@ class LedgerService extends BaseService
 
         foreach ($customer->sales()->posted()->get() as $sale) {
             $rows->push($this->row($sale->sale_date, 'Sale', $sale->reference_no, $sale->grand_total, 0));
+            if ((float) $sale->points_amount > 0) {
+                $rows->push($this->row($sale->sale_date, 'Points used (' . $sale->points_redeemed . ')', $sale->reference_no, 0, $sale->points_amount));
+            }
         }
         foreach ($customer->payments()->posted()->get() as $payment) {
             $rows->push($this->row($payment->payment_date, 'Payment Received', $payment->reference_no, 0, $payment->amount));

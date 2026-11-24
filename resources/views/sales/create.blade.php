@@ -3,8 +3,8 @@
 @section('content')
 <x-page-header title="New Sale" sub="Stock decreases when this is saved."><a class="btn btn-light" href="{{ route('sales.index') }}">Back</a></x-page-header>
 @include('invoices._form', [
-    'mode' => 'sale', 'action' => route('sales.store'), 'dateField' => 'sale_date', 'partyField' => 'customer_id', 'partyLabel' => 'Customer', 'parties' => $customers,
-    'partyDefault' => $customers->firstWhere('name', 'Walk-in Customer')?->unique_id,
+    'mode' => 'sale', 'action' => route('sales.store'), 'dateField' => 'sale_date', 'partyField' => 'customer_id', 'partyLabel' => 'Customer', 'parties' => $customers, 'walkInId' => $walkInId, 'pointSettings' => $pointSettings, 'pointBalances' => $pointBalances, 'vatDefaults' => $vatDefaults,
+    'partyDefault' => $customers->firstWhere('is_walk_in', true)?->unique_id,
 ])
 @endsection
 @push('scripts')

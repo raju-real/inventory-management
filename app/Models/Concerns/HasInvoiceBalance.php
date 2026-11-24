@@ -13,7 +13,7 @@ trait HasInvoiceBalance
 
         $this->paid_amount = round($paid, 2);
         $this->returned_amount = round($returned, 2);
-        $this->due_amount = max(0, round((float) $this->grand_total - $returned - $paid, 2));
+        $this->due_amount = max(0, round((float) $this->grand_total - $returned - $paid - (float) ($this->points_amount ?? 0), 2));
         $this->save();
     }
 
@@ -35,12 +35,12 @@ trait HasInvoiceBalance
      * Value of a returned line. Worked out from the whole line, and capped so that rounding
      * can never make the returns of an invoice worth more than the goods on it.
      */
-    public function returnLineValue(float $quantity, float $unitPrice, float $inThisReturn = 0): float
+    public function returnLineValue(float $quantity, float $unitPrice, float $inThisReturn = 0, float $vatPerUnit = 0): float
     {
-        $goodsValue = (float) $this->subtotal - (float) $this->discount;
+        $goodsValue = (float) $this->subtotal - (float) $this->discount + (float) ($this->vat_amount ?? 0);
         $alreadyReturned = (float) $this->returns()->posted()->sum('total_amount');
 
-        return round(min($quantity * $unitPrice * $this->netRatio(), max(0, $goodsValue - $alreadyReturned - $inThisReturn)), 2);
+        return round(min($quantity * ($unitPrice * $this->netRatio() + $vatPerUnit), max(0, $goodsValue - $alreadyReturned - $inThisReturn)), 2);
     }
 
     public function getPaymentStatusAttribute(): string
