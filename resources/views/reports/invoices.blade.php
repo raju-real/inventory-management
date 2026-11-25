@@ -4,7 +4,7 @@
 <x-page-header :title="$title"><button class="btn btn-light" onclick="window.print()"><i class="bi bi-printer me-1"></i>Print</button></x-page-header>
 <x-filter>
     <x-filter-select name="group" label="Show" placeholder="Invoice wise" :options="['date' => 'Date wise', 'party' => $partyLabel . ' wise']" />
-    <x-filter-select name="party_id" :label="$partyLabel" :options="$parties->pluck('name', 'unique_id')" />
+    <x-filter-remote name="party_id" :label="$partyLabel" :type="$partyLabel === 'Supplier' ? 'suppliers' : 'customers'" />
     <x-filter-dates />
 </x-filter>
 <div class="row g-3 mb-3">

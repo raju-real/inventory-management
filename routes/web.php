@@ -5,6 +5,9 @@ use App\Http\Controllers\BankAccountController;
 use App\Http\Controllers\BarcodeController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DueListController;
+use App\Http\Controllers\LookupController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\CustomerPaymentController;
 use App\Http\Controllers\DamageController;
 use App\Http\Controllers\DashboardController;
@@ -43,6 +46,11 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::post('logout', [AuthController::class, 'logout'])->name('logout');
 
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('notifications/feed', [NotificationController::class, 'feed'])->name('notifications.feed');
+    Route::post('notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
+    Route::get('notifications/{notification}/open', [NotificationController::class, 'open'])->name('notifications.open');
+    Route::post('notifications/{notification}/toggle', [NotificationController::class, 'toggle'])->name('notifications.toggle');
     Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');
 
@@ -106,6 +114,9 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('customer-ledger', 'customerLedger')->name('customer-ledger');
         Route::get('supplier-ledger', 'supplierLedger')->name('supplier-ledger');
     });
+    Route::get('reports/due-list', [DueListController::class, 'index'])->name('reports.due-list');
+    Route::get('reports/due-list/pdf', [DueListController::class, 'pdf'])->name('reports.due-list.pdf');
+    Route::get('lookup/{type}', LookupController::class)->name('lookup');
 
     // Admin only (enforced in the controllers)
     Route::resource('users', UserController::class)->except('show');

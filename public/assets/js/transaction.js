@@ -27,10 +27,14 @@
         return input;
     }
 
-    function cell(child, className) {
+    // label: shown above the value when the line list is too narrow for a table (see admin.css).
+    function cell(child, className, label) {
         const td = document.createElement('td');
         if (className) {
             td.className = className;
+        }
+        if (label) {
+            td.dataset.label = label;
         }
         if (child instanceof Node) {
             td.appendChild(child);
@@ -48,7 +52,8 @@
         type.name = 'items[' + index + '][vat_type]';
         type.setAttribute('data-role', 'vat-type');
         type.setAttribute('aria-label', 'VAT type');
-        type.append(new Option('%', 'percentage'), new Option('Flat', 'flat'));
+        type.title = 'P = percentage, F = flat amount per unit';
+        type.append(new Option('P', 'percentage'), new Option('F', 'flat'));
         type.value = product.vat_type === 'flat' ? 'flat' : 'percentage';
         const value = makeInput('items[' + index + '][vat_value]', product.vat_value || 0, {
             type: 'number', min: '0', step: 'any', placeholder: 'VAT', 'data-role': 'vat-value', 'aria-label': 'VAT',
@@ -56,6 +61,7 @@
         group.append(type, value);
 
         const wrap = document.createElement('div');
+        wrap.className = 'line-vat-wrap';
         const amount = document.createElement('div');
         amount.className = 'line-vat-amount';
         amount.setAttribute('data-role', 'vat-amount');
@@ -215,6 +221,9 @@
         row.dataset.productId = product.id;
         row.dataset.available = product.available;
 
+        // Row number comes from a CSS counter, so it stays right after removals.
+        row.appendChild(cell(undefined, 'c-sl'));
+
         const name = document.createElement('div');
         const title = document.createElement('div');
         title.className = 'fw-medium';
@@ -227,30 +236,30 @@
         hidden.name = 'items[' + index + '][product_id]';
         hidden.value = product.id;
         name.append(title, code, hidden);
-        row.appendChild(cell(name));
+        row.appendChild(cell(name, 'c-product'));
 
         if (mode !== 'purchase') {
-            row.appendChild(cell(product.available + ' ' + (product.unit || ''), 'text-nowrap'));
+            row.appendChild(cell(product.available + ' ' + (product.unit || ''), 'text-nowrap c-available', 'Available'));
         }
 
         const qtyAttrs = { type: 'number', min: '0.001', step: 'any', required: 'required', placeholder: 'Qty', 'data-role': 'qty' };
         if (mode !== 'purchase') {
             qtyAttrs.max = product.available;
         }
-        row.appendChild(cell(makeInput('items[' + index + '][quantity]', quantity, qtyAttrs)));
+        row.appendChild(cell(makeInput('items[' + index + '][quantity]', quantity, qtyAttrs), 'c-qty', 'Qty'));
 
         if (mode === 'damage') {
             row.appendChild(cell(makeInput('items[' + index + '][reason]', product.reason || '', {
                 type: 'text', required: 'required', maxlength: '255', placeholder: 'Damage reason',
-            })));
+            }), 'c-reason', 'Reason'));
         } else {
             row.appendChild(cell(makeInput('items[' + index + '][unit_price]', product.price, {
                 type: 'number', min: '0', step: 'any', required: 'required', placeholder: 'Price', 'data-role': 'price',
-            })));
+            }), 'c-price', mode === 'sale' ? 'Unit price' : 'Purchase price'));
             if (mode === 'sale') {
-                row.appendChild(cell(vatCell(index, product)));
+                row.appendChild(cell(vatCell(index, product), 'c-vat', 'VAT'));
             }
-            const total = cell('0.00', 'num');
+            const total = cell('0.00', 'num c-total', 'Total');
             total.dataset.role = 'total';
             row.appendChild(total);
         }
@@ -261,7 +270,7 @@
         remove.title = 'Remove';
         remove.setAttribute('data-role', 'remove');
         remove.innerHTML = '<i class="bi bi-x-lg"></i>';
-        row.appendChild(cell(remove, 'text-end'));
+        row.appendChild(cell(remove, 'text-end c-remove'));
 
         tbody.appendChild(row);
         return row;

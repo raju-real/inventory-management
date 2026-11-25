@@ -65,13 +65,16 @@ class AccessControlTest extends TestCase
     public function test_shortcut_keys_and_dashboard_hints_follow_permissions()
     {
         $page = $this->actingAs($this->admin())->get(route('dashboard'))->assertOk();
-        $page->assertSee('data-shortcut="F4"', false)->assertSee('data-shortcut="F5"', false);
-        $page->assertSee('<kbd>F4</kbd> New Sale', false)->assertSee('<kbd>F5</kbd> New Purchase', false);
+        foreach (['F1' => 'New Sale', 'F2' => 'New Purchase', 'F3' => 'New Income', 'F4' => 'New Expense'] as $key => $text) {
+            $page->assertSee('data-shortcut="' . $key . '"', false)->assertSee('<kbd>' . $key . '</kbd> ' . $text, false);
+        }
+        $page->assertSee('<kbd>F5</kbd> Save Sale', false)->assertSee('<kbd>F6</kbd> Print POS receipt', false);
 
         $cashier = $this->staff(['dashboard' => ['view'], 'sales' => ['view', 'create']]);
         $page = $this->actingAs($cashier)->get(route('dashboard'))->assertOk();
-        $page->assertSee('data-shortcut="F4"', false)->assertDontSee('data-shortcut="F5"', false);
-        $page->assertSee('<kbd>F4</kbd> New Sale', false)->assertDontSee('<kbd>F5</kbd>', false);
+        $page->assertSee('data-shortcut="F1"', false)->assertDontSee('data-shortcut="F2"', false)->assertDontSee('data-shortcut="F3"', false);
+        $page->assertSee('<kbd>F1</kbd> New Sale', false)->assertDontSee('<kbd>F2</kbd>', false)->assertSee('<kbd>F5</kbd> Save Sale', false);
+        $this->get(route('sales.create'))->assertSee('data-shortcut="F5"', false);
 
         $viewer = $this->staff(['dashboard' => ['view']]);
         $this->actingAs($viewer)->get(route('dashboard'))->assertDontSee('data-shortcut', false)->assertDontSee('Shortcuts:');

@@ -69,6 +69,11 @@
     }
 
     document.addEventListener('show.bs.tooltip', function (event) {
+        // A button whose menu is open (the bell, for example) would cover the menu with its tooltip.
+        if (event.target.getAttribute('aria-expanded') === 'true') {
+            event.preventDefault();
+            return;
+        }
         if (!event.target.hasAttribute('data-shortcut') && visibleText(event.target) !== '') {
             event.preventDefault();
         }
@@ -133,8 +138,9 @@
         }
     });
 
-    // Keyboard shortcuts: top bar links (F4, F5) and page buttons (F9 prints the receipt).
-    // A user without the link keeps the key's normal meaning, so F5 still refreshes for them.
+    // Keyboard shortcuts: top bar links (F1 sale, F2 purchase, F3 income, F4 expense) and page
+    // buttons (F5 saves the sale, F6 prints the POS receipt). Where a page has no such link or
+    // button, the key keeps its normal browser meaning, so F5 still refreshes other pages.
     document.addEventListener('keydown', function (event) {
         if (event.ctrlKey || event.altKey || event.metaKey || event.shiftKey) {
             return;

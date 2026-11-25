@@ -4,7 +4,7 @@
     <a class="btn btn-outline-primary" target="_blank" rel="noopener" href="{{ route($prefix . '.pdf', $invoice) }}"><i class="bi bi-printer me-1"></i>Print / PDF</a>
     @if ($prefix === 'sales')
         <a class="btn btn-outline-primary" target="_blank" rel="noopener" href="{{ route('sales.receipt', $invoice) }}"><i class="bi bi-receipt-cutoff me-1"></i>POS Receipt</a>
-        <button type="button" class="btn btn-primary" title="Print POS receipt now (F9)" aria-label="Print POS receipt now" data-direct-print="{{ route('sales.receipt', $invoice) }}" data-shortcut="F9" aria-keyshortcuts="F9"><i class="bi bi-printer-fill"></i></button>
+        <button type="button" class="btn btn-primary" title="Print POS receipt now (F6)" aria-label="Print POS receipt now" data-direct-print="{{ route('sales.receipt', $invoice) }}" data-shortcut="F6" aria-keyshortcuts="F6"><i class="bi bi-printer-fill"></i></button>
     @endif
     <a class="btn btn-outline-primary" href="{{ route($prefix . '.pdf', [$invoice, 'download' => 1]) }}"><i class="bi bi-download me-1"></i>Download</a>
     <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#emailModal"><i class="bi bi-envelope me-1"></i>Email</button>

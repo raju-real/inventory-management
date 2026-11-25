@@ -51,7 +51,6 @@ class ReportController extends Controller
             'title' => 'Purchase Report',
             'route' => 'reports.purchases',
             'partyLabel' => 'Supplier',
-            'parties' => Supplier::cachedActive(),
             'group' => $filters['group'] ?? 'invoice',
         ]);
     }
@@ -64,7 +63,6 @@ class ReportController extends Controller
             'title' => 'Sales Report',
             'route' => 'reports.sales',
             'partyLabel' => 'Customer',
-            'parties' => Customer::cachedActive(),
             'group' => $filters['group'] ?? 'invoice',
         ]);
     }
@@ -75,7 +73,6 @@ class ReportController extends Controller
 
         return view('reports.damage-returns', $this->service->damageReturns($type, $this->resolveIds($this->dateFilters($request, ['product_id']), ['product_id' => Product::class])) + [
             'type' => $type,
-            'products' => Product::rememberCache('options', fn () => Product::orderBy('name')->get(['id', 'unique_id', 'name', 'sku'])),
         ]);
     }
 
@@ -88,7 +85,6 @@ class ReportController extends Controller
             'title' => 'Customer Ledger',
             'route' => 'reports.customer-ledger',
             'partyLabel' => 'Customer',
-            'parties' => Customer::rememberCache('options', fn () => Customer::orderBy('name')->get(['id', 'unique_id', 'name', 'mobile'])),
             'party' => $customer,
             'ledger' => $customer ? $this->ledger->customer($customer, $filters) : null,
             'balanceHint' => 'Positive balance: the customer owes you.',
@@ -104,7 +100,6 @@ class ReportController extends Controller
             'title' => 'Supplier Ledger',
             'route' => 'reports.supplier-ledger',
             'partyLabel' => 'Supplier',
-            'parties' => Supplier::rememberCache('options', fn () => Supplier::orderBy('name')->get(['id', 'unique_id', 'name', 'mobile'])),
             'party' => $supplier,
             'ledger' => $supplier ? $this->ledger->supplier($supplier, $filters) : null,
             'balanceHint' => 'Positive balance: you owe the supplier.',

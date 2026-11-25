@@ -52,6 +52,7 @@ class StockService extends BaseService
 
         $product->current_stock = round($available + $in - $out, 3);
         $product->save();
+        app(NotificationService::class)->stockChanged($product, $available, (float) $product->min_stock);
 
         StockTransaction::create([
             'product_id' => $product->id,

@@ -70,7 +70,13 @@ class ProductService extends BaseService
         $data = $this->withVatDefaults($this->images->resolve($data, $product, 'products'));
         $data['sku'] = $data['sku'] ?? $product->sku;
         $data['min_stock'] = $data['min_stock'] ?? 0;
-        $product->update($data);
+        $oldMinimum = (float) $product->min_stock;
+
+        DB::transaction(function () use ($product, $data, $oldMinimum) {
+            $product->update($data);
+            // A new minimum can make the product low on stock, or no longer low.
+            app(NotificationService::class)->stockChanged($product, (float) $product->current_stock, $oldMinimum);
+        }, 3);
 
         return $product;
     }

@@ -3,7 +3,7 @@
 @section('content')
 <x-page-header title="Stock Ledger" sub="Every stock movement, newest first."><button class="btn btn-light" onclick="window.print()"><i class="bi bi-printer me-1"></i>Print</button></x-page-header>
 <x-filter search="Search by reference number">
-    <x-filter-select name="product_id" label="Product" :options="$products->pluck('name', 'unique_id')" />
+    <x-filter-remote name="product_id" label="Product" type="products" col="col-md-2" />
     <x-filter-select name="type" label="Type" :options="$types" />
     <x-filter-dates />
 </x-filter>

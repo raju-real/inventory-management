@@ -181,7 +181,7 @@ class SaleDiscountVatTest extends TestCase
         $sale = Sale::first();
 
         $page = $this->get(route('sales.show', $sale))->assertOk();
-        $page->assertSee('data-direct-print="' . route('sales.receipt', $sale) . '"', false)->assertSee('data-shortcut="F9"', false);
+        $page->assertSee('data-direct-print="' . route('sales.receipt', $sale) . '"', false)->assertSee('data-shortcut="F6"', false);
         $this->get(route('sales.index'))->assertSee('data-direct-print="' . route('sales.receipt', $sale) . '"', false);
     }
 }

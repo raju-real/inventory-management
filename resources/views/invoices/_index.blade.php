@@ -3,7 +3,7 @@
     @access($menuKey, 'create')<a class="btn btn-primary btn-submit" href="{{ route($prefix . '.create') }}"><i class="bi bi-plus-lg me-1"></i>{{ $newLabel }}</a>@endaccess
 </x-page-header>
 <x-filter :search="$searchHint">
-    <x-filter-select name="party_id" :label="$partyLabel" :options="$parties->pluck('name', 'unique_id')" />
+    <x-filter-remote name="party_id" :label="$partyLabel" :type="str_starts_with($partyField, 'supplier') ? 'suppliers' : 'customers'" col="col-md-2" />
     <x-filter-select name="status" label="Status" :options="['posted' => 'Posted', 'cancelled' => 'Cancelled']" />
     <x-filter-dates />
 </x-filter>

@@ -45,7 +45,7 @@ class SaleController extends Controller
     {
         $sale = $this->service->create($request->validated());
 
-        return redirect()->route('sales.show', $sale)->with('success', "Sale {$sale->reference_no} saved and stock updated. Press F9 to print the receipt.");
+        return redirect()->route('sales.show', $sale)->with('success', "Sale {$sale->reference_no} saved and stock updated. Press F6 to print the POS receipt.");
     }
 
     public function show(Sale $sale)

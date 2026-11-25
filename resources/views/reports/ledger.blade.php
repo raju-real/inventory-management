@@ -3,15 +3,7 @@
 @section('content')
 <x-page-header :title="$title" :sub="$party?->name"><button class="btn btn-light" onclick="window.print()"><i class="bi bi-printer me-1"></i>Print</button></x-page-header>
 <x-filter>
-    <div class="col-md-3">
-        <label class="form-label small" for="party_id">{{ $partyLabel }}</label>
-        <select class="form-select" id="party_id" name="party_id" required>
-            <option value="">Select {{ strtolower($partyLabel) }}</option>
-            @foreach ($parties as $option)
-                <option value="{{ $option->unique_id }}" @selected((string) request('party_id') === (string) $option->unique_id)>{{ $option->name }}{{ $option->mobile ? ' (' . $option->mobile . ')' : '' }}</option>
-            @endforeach
-        </select>
-    </div>
+    <x-filter-remote name="party_id" :label="$partyLabel" :type="$partyLabel === 'Supplier' ? 'suppliers' : 'customers'" required />
     <x-filter-dates />
 </x-filter>
 @if ($ledger)

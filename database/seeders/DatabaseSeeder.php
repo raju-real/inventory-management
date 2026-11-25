@@ -80,6 +80,7 @@ class DatabaseSeeder extends Seeder
                 ['Damage & Return Report', 'report-damage-returns', 'reports.damage-returns', 'bi-file-earmark-x', $viewOnly],
                 ['Customer Ledger', 'report-customer-ledger', 'reports.customer-ledger', 'bi-journal-check', $viewOnly],
                 ['Supplier Ledger', 'report-supplier-ledger', 'reports.supplier-ledger', 'bi-journal-arrow-down', $viewOnly],
+                ['Due List', 'report-due-list', 'reports.due-list', 'bi-hourglass-split', $viewOnly],
             ]],
             ['Settings', 'settings', null, 'bi-gear', null, [
                 ['Users', 'users', 'users.index', 'bi-person-gear', null, [], true],

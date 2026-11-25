@@ -17,12 +17,12 @@
                     </div>
                 </div>
             </div></div>
-            <div class="card">
-                <div class="table-responsive">
+            <div class="card line-card">
+                <div class="line-wrap">
                     <table class="table line-table">
-                        <thead><tr><th>Product</th><th>Available</th><th style="width:120px">Damage qty</th><th>Reason</th><th style="width:50px"></th></tr></thead>
+                        <thead><tr><th style="width:48px">#</th><th>Product</th><th>Available</th><th style="width:100px">Damage qty</th><th>Reason</th><th style="width:50px"></th></tr></thead>
                         <tbody id="line-items"></tbody>
-                        <tbody><tr id="line-empty"><td colspan="5" class="text-center text-muted py-5"><i class="bi bi-upc-scan d-block fs-2 mb-1"></i>Scan a barcode or search for a product to begin.</td></tr></tbody>
+                        <tbody><tr id="line-empty"><td colspan="6" class="text-center text-muted py-5"><i class="bi bi-upc-scan d-block fs-2 mb-1"></i>Scan a barcode or search for a product to begin.</td></tr></tbody>
                     </table>
                 </div>
             </div>

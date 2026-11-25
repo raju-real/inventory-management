@@ -39,7 +39,8 @@ class AppServiceProvider extends ServiceProvider
             $user = auth()->user();
             $view->with([
                 'sidebarMenus' => app(AccessService::class)->sidebarFor($user),
-                'lowStockCount' => $user->canAccess('report-low-stock') || $user->canAccess('products') ? app(DashboardService::class)->lowStockCount() : 0,
+                'canSeeNotifications' => \App\Services\NotificationService::canSee($user),
+                'unreadNotifications' => app(\App\Services\NotificationService::class)->unreadCount($user),
             ]);
         });
 

@@ -10,7 +10,7 @@
 <form method="GET" class="card card-body mb-3 no-print">
     <input type="hidden" name="type" value="{{ $type }}">
     <div class="row g-2 align-items-end">
-        <x-filter-select name="product_id" label="Product" :options="$products->pluck('name', 'unique_id')" />
+        <x-filter-remote name="product_id" label="Product" type="products" />
         <x-filter-dates />
         <div class="col-auto ms-auto"><a class="btn btn-light" href="{{ route('reports.damage-returns', ['type' => $type]) }}">Reset</a> <button class="btn btn-primary btn-submit" type="submit"><i class="bi bi-funnel me-1"></i>Filter</button></div>
     </div>

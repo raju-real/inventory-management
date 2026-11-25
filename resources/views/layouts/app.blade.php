@@ -62,10 +62,10 @@
     <header class="topbar">
         <button class="btn btn-light" type="button" data-sidebar-toggle aria-label="Toggle menu" title="Hide or show the menu"><i class="bi bi-list"></i></button>
         @foreach ([
-            ['sales', 'sales.create', 'New Sale', 'bi-receipt', 'btn-primary', 'F4'],
-            ['purchases', 'purchases.create', 'New Purchase', 'bi-bag-plus', 'btn-outline-primary', 'F5'],
-            ['incomes', 'incomes.create', 'New Income', 'bi-arrow-down-left-circle', 'btn-outline-primary', null],
-            ['expenses', 'expenses.create', 'New Expense', 'bi-arrow-up-right-circle', 'btn-outline-primary', null],
+            ['sales', 'sales.create', 'New Sale', 'bi-receipt', 'btn-primary', 'F1'],
+            ['purchases', 'purchases.create', 'New Purchase', 'bi-bag-plus', 'btn-outline-primary', 'F2'],
+            ['incomes', 'incomes.create', 'New Income', 'bi-arrow-down-left-circle', 'btn-outline-primary', 'F3'],
+            ['expenses', 'expenses.create', 'New Expense', 'bi-arrow-up-right-circle', 'btn-outline-primary', 'F4'],
         ] as [$menuKey, $routeName, $text, $icon, $style, $shortcut])
             @access($menuKey, 'create')
                 <a class="btn {{ $style }} btn-submit" href="{{ route($routeName) }}" title="{{ $text }}{{ $shortcut ? ' (' . $shortcut . ')' : '' }}" @if ($shortcut) data-shortcut="{{ $shortcut }}" aria-keyshortcuts="{{ $shortcut }}" @endif><i class="bi {{ $icon }}"></i><span class="d-none d-xl-inline ms-1">{{ $text }}</span></a>
@@ -75,14 +75,21 @@
             @if (setting('barcode_enabled', '1') === '1')
                 <span class="scan-status d-none d-xxl-inline-flex" title="A connected barcode scanner works on this page"><span class="dot"></span> Scanner ready</span>
             @endif
-            @if (auth()->user()->canAccess('report-low-stock') || auth()->user()->canAccess('products'))
-                <a class="btn btn-light position-relative" title="Low stock products" aria-label="Low stock products"
-                   href="{{ auth()->user()->canAccess('report-low-stock') ? route('reports.low-stock') : route('products.index', ['low_stock' => 1]) }}">
-                    <i class="bi bi-bell"></i>
-                    @if ($lowStockCount > 0)
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ $lowStockCount }}</span>
-                    @endif
-                </a>
+            @if ($canSeeNotifications)
+                <div class="dropdown notify" data-feed-url="{{ route('notifications.feed') }}" data-read-all-url="{{ route('notifications.read-all') }}">
+                    <button class="btn btn-light position-relative" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" title="Notifications" aria-label="Notifications">
+                        <i class="bi bi-bell"></i>
+                        <span class="notify-count position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger {{ $unreadNotifications > 0 ? '' : 'd-none' }}">{{ $unreadNotifications > 99 ? '99+' : $unreadNotifications }}</span>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end notify-menu p-0">
+                        <div class="notify-head">
+                            <span>Notifications <span class="notify-head-count text-muted small"></span></span>
+                            <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none" data-notify-read-all>Mark all as read</button>
+                        </div>
+                        <div class="notify-list" data-notify-list><div class="notify-empty"><span class="spinner-border spinner-border-sm"></span></div></div>
+                        <a class="notify-foot" href="{{ route('notifications.index') }}">View all notifications</a>
+                    </div>
+                </div>
             @endif
             <div class="dropdown">
                 <button class="btn btn-light dropdown-toggle d-flex align-items-center gap-2" data-bs-toggle="dropdown" type="button">
@@ -163,6 +170,7 @@
 <script src="{{ asset('assets/js/forms.js') }}"></script>
 <script src="{{ asset('assets/js/app.js') }}"></script>
 <script src="{{ asset('assets/js/scanner.js') }}"></script>
+@if ($canSeeNotifications)<script src="{{ asset('assets/js/notifications.js') }}"></script>@endif
 @stack('scripts')
 </body>
 </html>

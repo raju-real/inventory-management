@@ -2,11 +2,14 @@
 @section('title', 'Dashboard')
 @section('content')
 <x-page-header title="Dashboard" :sub="now()->format('l, d F Y')">
-    @if (auth()->user()->canAccess('sales', 'create') || auth()->user()->canAccess('purchases', 'create'))
+    @if (collect(['sales', 'purchases', 'incomes', 'expenses'])->contains(fn ($menu) => auth()->user()->canAccess($menu, 'create')))
         <div class="shortcut-hints" aria-label="Keyboard shortcuts">
             <i class="bi bi-keyboard"></i><span class="d-none d-sm-inline">Shortcuts:</span>
-            @access('sales', 'create')<span><kbd>F4</kbd> New Sale</span>@endaccess
-            @access('purchases', 'create')<span><kbd>F5</kbd> New Purchase</span>@endaccess
+            @access('sales', 'create')<span><kbd>F1</kbd> New Sale</span>@endaccess
+            @access('purchases', 'create')<span><kbd>F2</kbd> New Purchase</span>@endaccess
+            @access('incomes', 'create')<span><kbd>F3</kbd> New Income</span>@endaccess
+            @access('expenses', 'create')<span><kbd>F4</kbd> New Expense</span>@endaccess
+            @access('sales', 'create')<span title="On the sale screen"><kbd>F5</kbd> Save Sale</span><span title="On a saved sale"><kbd>F6</kbd> Print POS receipt</span>@endaccess
         </div>
     @endif
 </x-page-header>
