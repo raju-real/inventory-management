@@ -82,17 +82,29 @@ class ProductController extends Controller
         return redirect()->route('products.index')->with('success', 'Product deleted.');
     }
 
+    /** Common sticker sizes, width x height in millimetres. */
+    public const LABEL_SIZES = ['38x25' => '38 x 25 mm', '50x25' => '50 x 25 mm', '50x30' => '50 x 30 mm (standard)', '60x40' => '60 x 40 mm'];
+
     public function labels(Request $request, Product $product, BarcodeService $barcode)
     {
         $data = $request->validate([
             'copies' => ['nullable', 'integer', 'min:1', 'max:200'],
             'show_price' => ['nullable', 'boolean'],
+            'show_name' => ['nullable', 'boolean'],
+            'show_shop' => ['nullable', 'boolean'],
+            'size' => ['nullable', 'in:' . implode(',', array_keys(self::LABEL_SIZES))],
+            'layout' => ['nullable', 'in:sheet,roll'],
         ]);
 
         return view('products.labels', [
             'product' => $product,
-            'copies' => $data['copies'] ?? 1,
-            'showPrice' => $data['show_price'] ?? true,
+            'copies' => (int) ($data['copies'] ?? 1),
+            'showPrice' => (bool) ($data['show_price'] ?? true),
+            'showName' => (bool) ($data['show_name'] ?? true),
+            'showShop' => (bool) ($data['show_shop'] ?? true),
+            'size' => $data['size'] ?? '50x30',
+            'layout' => $data['layout'] ?? 'sheet',
+            'sizes' => self::LABEL_SIZES,
             'barcodeSvg' => $barcode->svg($product->label_code),
         ]);
     }

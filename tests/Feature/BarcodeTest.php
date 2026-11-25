@@ -90,6 +90,22 @@ class BarcodeTest extends TestCase
             ->assertOk()->assertSee('<svg', false)->assertSee('8901234567890');
     }
 
+    public function test_label_options_show_or_hide_the_price_and_change_the_size()
+    {
+        $product = $this->product(['barcode' => '8901234567890', 'sales_price' => 1650]);
+        $this->actingAs($this->admin());
+
+        $shown = $this->get(route('products.labels', [$product, 'copies' => 2]))->assertOk();
+        $shown->assertSee('class="sheet size-50x30 layout-sheet"', false)->assertSee('id="show_price" name="show_price" value="1" checked', false);
+        $this->assertSame(2, substr_count($shown->getContent(), '<div class="label">'));
+
+        $this->get(route('products.labels', [$product, 'show_price' => 0, 'show_shop' => 0, 'size' => '38x25', 'layout' => 'roll']))
+            ->assertOk()->assertSee('class="sheet size-38x25 layout-roll hide-price hide-shop"', false)
+            ->assertDontSee('id="show_price" name="show_price" value="1" checked', false);
+
+        $this->get(route('products.labels', [$product, 'size' => '99x99']))->assertSessionHasErrors('size');
+    }
+
     public function test_barcode_settings_are_validated_and_reach_the_page()
     {
         $this->actingAs($this->admin());

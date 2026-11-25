@@ -6,11 +6,11 @@
       @if ($mode === 'sale') data-walk-in="{{ $walkInId ?? '' }}" data-points="{{ json_encode($pointBalances) }}" data-point-value="{{ $pointSettings['point_value'] }}" data-point-earn="{{ $pointSettings['earn_enabled'] ? $pointSettings['earn_amount'] : 0 }}" @endif
       @if ($mode === 'purchase' && auth()->user()->canAccess('products', 'create')) data-create-url="{{ route('products.create') }}" @endif>
     @csrf
-    {{-- 1. Who, when and what: product search, date and party on one line. --}}
+    {{-- 1. Product search and date. --}}
     <div class="card mb-3 entry-bar">
         <div class="card-body">
             <div class="row g-3">
-                <div class="col-xl-6">
+                <div class="col-md-8 col-xl-9">
                     <label class="form-label" for="product-search">Add product</label>
                     <div class="picker">
                         <div class="input-group">
@@ -23,20 +23,8 @@
                         No product has barcode <strong data-code></strong>. <a target="_blank" rel="noopener" href="#">Create this product</a>
                     </div>
                 </div>
-                <div class="col-sm-5 col-xl-2">
+                <div class="col-md-4 col-xl-3">
                     <x-input :name="$dateField" type="date" :label="$mode === 'sale' ? 'Sales date' : 'Purchase date'" placeholder="Select date" :value="now()->toDateString()" required wrapper="mb-0" />
-                </div>
-                <div class="col-sm-7 col-xl-4">
-                    <x-select :name="$partyField" :label="$partyLabel" class="js-select2" :options="$parties->mapWithKeys(fn ($party) => [$party->unique_id => $party->name . ($party->mobile ? ' (' . $party->mobile . ')' : '')])" :value="$partyDefault ?? null" required wrapper="mb-0">
-                        @access($mode === 'sale' ? 'customers' : 'suppliers', 'create')
-                            <x-slot name="labelAction">
-                                <button type="button" class="btn btn-sm btn-outline-primary quick-add-btn party-add" data-bs-toggle="modal" data-bs-target="#partyModal" title="Add new {{ strtolower($partyLabel) }}" aria-label="Add new {{ strtolower($partyLabel) }}"><i class="bi bi-plus-lg"></i></button>
-                            </x-slot>
-                        @endaccess
-                    </x-select>
-                    @if ($mode === 'sale')
-                        <div id="walk-in-due" class="form-text text-danger d-none"><i class="bi bi-exclamation-circle me-1"></i>A sale with a due amount needs a named customer. Choose the customer, or take the full payment.</div>
-                    @endif
                 </div>
             </div>
         </div>
@@ -72,12 +60,24 @@
         </div>
     </div>
 
-    {{-- 3. Adjustments, payment and totals side by side under the list. --}}
+    {{-- 3. Customer, discount and VAT; payment; totals. --}}
     <div class="card summary-card">
         <div class="card-body">
             <div class="row g-0 summary-line">
                 <div class="col-md-6 col-xl-4 summary-col">
-                    <div class="summary-heading"><i class="bi bi-sliders"></i>{{ $mode === 'sale' ? 'Discount & VAT' : 'Adjustments' }}</div>
+                    <div class="summary-heading"><i class="bi bi-sliders"></i>{{ $mode === 'sale' ? 'Customer, Discount & VAT' : 'Supplier & Adjustments' }}</div>
+                    <div class="summary-party">
+                        <x-select :name="$partyField" :label="$partyLabel" class="js-select2" :options="$parties->mapWithKeys(fn ($party) => [$party->unique_id => $party->name . ($party->mobile ? ' (' . $party->mobile . ')' : '')])" :value="$partyDefault ?? null" required wrapper="mb-0">
+                            @access($mode === 'sale' ? 'customers' : 'suppliers', 'create')
+                                <x-slot name="labelAction">
+                                    <button type="button" class="btn btn-sm btn-outline-primary quick-add-btn party-add" data-bs-toggle="modal" data-bs-target="#partyModal" title="Add new {{ strtolower($partyLabel) }}" aria-label="Add new {{ strtolower($partyLabel) }}"><i class="bi bi-plus-lg"></i></button>
+                                </x-slot>
+                            @endaccess
+                        </x-select>
+                        @if ($mode === 'sale')
+                            <div id="walk-in-due" class="form-text text-danger d-none"><i class="bi bi-exclamation-circle me-1"></i>A sale with a due amount needs a named customer. Choose the customer, or take the full payment.</div>
+                        @endif
+                    </div>
                     @if ($mode === 'sale' && ($pointSettings['earn_enabled'] || $pointSettings['redeem_enabled']))
                         <div id="points-box" class="points-box d-none">
                             <div class="d-flex justify-content-between align-items-center gap-2">

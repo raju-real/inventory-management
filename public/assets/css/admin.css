@@ -282,6 +282,7 @@ body { font-size: .9rem; background: var(--page); }
 .summary-col + .summary-col { border-left: 1px solid var(--line); }
 .summary-heading { display: flex; align-items: center; gap: .45rem; font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin-bottom: .4rem; }
 .summary-heading i { color: var(--brand); font-size: .9rem; }
+.summary-party { margin-bottom: .85rem; }
 .summary-total-box { background: var(--brand-soft); border: 1px solid #99f6e4; border-radius: 12px; padding: .75rem 1rem 1rem; }
 .summary-total-box .summary-row.total { border-top: 0; margin-top: 0; font-size: 1.3rem; color: var(--brand-dark); }
 .summary-due { font-weight: 600; border-top: 1px dashed #99f6e4; margin-top: .2rem; }
